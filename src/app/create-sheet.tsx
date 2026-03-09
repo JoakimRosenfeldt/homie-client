@@ -1,9 +1,24 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { ScrollView, Pressable, Text, useColorScheme, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { Pressable, ScrollView, Text, useColorScheme, View } from "react-native";
+
+const CREATE_CONTENT = {
+  agent: {
+    title: "Agent",
+    description: "Start an agent setup flow with its own role, behavior, and workflow.",
+    symbol: "sparkles",
+  },
+  listing: {
+    title: "Listing",
+    description: "Open the listing flow and start filling in the details for a new property.",
+    symbol: "doc.text",
+  },
+} as const;
 
 export default function CreateSheet() {
   const isDark = useColorScheme() === "dark";
+  const { kind } = useLocalSearchParams<{ kind?: "agent" | "listing" }>();
+  const content = CREATE_CONTENT[kind ?? "agent"] ?? CREATE_CONTENT.agent;
 
   const colors = {
     background: isDark ? "#1C1C1E" : "#FFFFFF",
@@ -11,6 +26,7 @@ export default function CreateSheet() {
     title: isDark ? "#FFFFFF" : "#111111",
     body: isDark ? "#A1A1A6" : "#6D6D72",
     border: isDark ? "#3A3A3C" : "#E5E5EA",
+    accent: isDark ? "#0A84FF" : "#007AFF",
   };
 
   return (
@@ -22,7 +38,6 @@ export default function CreateSheet() {
         paddingHorizontal: 20,
         paddingTop: 12,
         paddingBottom: 24,
-        gap: 12,
       }}>
       <View
         style={{
@@ -30,120 +45,73 @@ export default function CreateSheet() {
           borderRadius: 28,
           borderCurve: "continuous",
           padding: 20,
-          gap: 12,
+          gap: 18,
           borderWidth: 1,
           borderColor: colors.border,
         }}>
-        <Text
-          selectable
+        <View
           style={{
-            fontSize: 17,
-            lineHeight: 24,
-            color: colors.body,
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            borderCurve: "continuous",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: colors.secondaryBackground,
           }}>
-          Choose what you want to create.
-        </Text>
+          <Image
+            source={`sf:${content.symbol}`}
+            style={{
+              width: 22,
+              height: 22,
+              tintColor: colors.accent,
+            }}
+          />
+        </View>
 
-        <CreateOption
-          title="Agent"
-          description="Create a new assistant with its own role, behavior, and workflow."
-          symbol="sparkles"
-          colors={colors}
-        />
+        <View style={{ gap: 6 }}>
+          <Text
+            selectable
+            style={{
+              fontSize: 28,
+              lineHeight: 32,
+              fontWeight: "700",
+              color: colors.title,
+            }}>
+            {content.title}
+          </Text>
+          <Text
+            selectable
+            style={{
+              fontSize: 16,
+              lineHeight: 22,
+              color: colors.body,
+            }}>
+            {content.description}
+          </Text>
+        </View>
 
-        <CreateOption
-          title="Listing"
-          description="Start a new listing with details you can review, save, and publish later."
-          symbol="doc.text"
-          colors={colors}
-        />
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => ({
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 52,
+            borderRadius: 18,
+            borderCurve: "continuous",
+            backgroundColor: pressed ? "#3395FF" : colors.accent,
+          })}>
+          <Text
+            style={{
+              fontSize: 16,
+              lineHeight: 20,
+              fontWeight: "600",
+              color: "#FFFFFF",
+            }}>
+            Continue
+          </Text>
+        </Pressable>
       </View>
     </ScrollView>
-  );
-}
-
-function CreateOption({
-  title,
-  description,
-  symbol,
-  colors,
-}: {
-  title: string;
-  description: string;
-  symbol: string;
-  colors: {
-    background: string;
-    secondaryBackground: string;
-    title: string;
-    body: string;
-    border: string;
-  };
-}) {
-  return (
-    <Pressable
-      onPress={() => router.back()}
-      style={({ pressed }) => ({
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 14,
-        padding: 16,
-        borderRadius: 22,
-        borderCurve: "continuous",
-        backgroundColor: colors.secondaryBackground,
-        borderWidth: 1,
-        borderColor: colors.border,
-        opacity: pressed ? 0.82 : 1,
-      })}>
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          borderCurve: "continuous",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: colors.background,
-        }}>
-        <Image
-          source={`sf:${symbol}`}
-          style={{
-            width: 18,
-            height: 18,
-            tintColor: colors.title,
-          }}
-        />
-      </View>
-
-      <View style={{ flex: 1, gap: 2 }}>
-        <Text
-          selectable
-          style={{
-            fontSize: 17,
-            lineHeight: 22,
-            fontWeight: "600",
-            color: colors.title,
-          }}>
-          {title}
-        </Text>
-        <Text
-          selectable
-          style={{
-            fontSize: 14,
-            lineHeight: 20,
-            color: colors.body,
-          }}>
-          {description}
-        </Text>
-      </View>
-
-      <Image
-        source="sf:chevron.right"
-        style={{
-          width: 12,
-          height: 12,
-          tintColor: colors.body,
-        }}
-      />
-    </Pressable>
   );
 }
