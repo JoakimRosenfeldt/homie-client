@@ -25,6 +25,13 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Homie to access your photos so you can upload listing images."
+        }
+      ],
       [
         "expo-splash-screen",
         {
