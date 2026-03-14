@@ -168,7 +168,9 @@ export function getCompletedSteps(
     steps.add("details");
   }
 
-  steps.add("features");
+  if (listing.amenities.length > 0) {
+    steps.add("features");
+  }
 
   if (checklist.find((item) => item.step === "location")?.complete) {
     steps.add("location");

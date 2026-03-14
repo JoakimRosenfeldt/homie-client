@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 import { listingsApi } from "@/features/listings/api";
 import { ListingScreen, LoadingCard, MessageCard } from "@/features/listings/components";
-import { useMyListings } from "@/features/listings/hooks";
-import { getResumeStepFromCompletedSteps, getStepRoute } from "@/features/listings/navigation";
+import { useDeviceOwnerKey } from "@/features/listings/hooks";
+import { getStepRoute } from "@/features/listings/navigation";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
 
 export default function NewListingIndexScreen() {
@@ -32,23 +32,17 @@ function ListingConfigurationState() {
 }
 
 function ListingEntryResolver() {
-  const { ownerKey, error, isLoading, listings } = useMyListings("draft");
+  const { ownerKey, error, isLoading } = useDeviceOwnerKey();
   const createDraft = useMutation(listingsApi.createDraft);
   const [entryError, setEntryError] = useState<string | null>(null);
   const [isRouting, setIsRouting] = useState(false);
 
   useEffect(() => {
-    if (isRouting || isLoading || !ownerKey || listings === undefined) {
+    if (isRouting || isLoading || !ownerKey) {
       return;
     }
 
     setIsRouting(true);
-
-    const latestDraft = listings[0];
-    if (latestDraft) {
-      router.replace(getStepRoute(latestDraft._id, getResumeStepFromCompletedSteps(latestDraft.completedSteps)) as never);
-      return;
-    }
 
     createDraft({ ownerKey })
       .then(({ listingId }) => {
@@ -58,7 +52,7 @@ function ListingEntryResolver() {
         setEntryError(caughtError instanceof Error ? caughtError.message : "We couldn't create your listing draft.");
         setIsRouting(false);
       });
-  }, [createDraft, isLoading, isRouting, listings, ownerKey]);
+  }, [createDraft, isLoading, isRouting, ownerKey]);
 
   return (
     <ListingScreen>
@@ -78,7 +72,7 @@ function ListingEntryResolver() {
         />
       ) : null}
       {!error && !entryError ? (
-        <LoadingCard label="Checking for an existing draft on this device and opening the listing flow." />
+        <LoadingCard label="Creating a new listing draft on this device." />
       ) : null}
     </ListingScreen>
   );

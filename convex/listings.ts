@@ -9,6 +9,7 @@ import {
   DEFAULT_CURRENCY,
   MAX_LISTING_PHOTOS,
   type ListingAmenity,
+  type ListingStepKey,
 } from "../src/features/listings/model";
 import { buildPublicLocationLabel, getCompletionState, normalizeText, requiresAvailableTo } from "../src/features/listings/validation";
 
