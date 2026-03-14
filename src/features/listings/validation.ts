@@ -4,7 +4,7 @@ import type {
   ListingDraft,
   ListingStepKey,
   RentalArrangement,
-} from "@/features/listings/model";
+} from "./model";
 
 export function normalizeText(value?: string | null) {
   return value?.trim() || undefined;
@@ -216,7 +216,7 @@ export function getCompletionState(
 
 export function getFirstIncompleteStep(draft: Pick<ListingDraft, keyof ListingDraft>) {
   const completion = getCompletionState(draft);
-  const incomplete = completion.checklist.find((item) => !item.complete);
+  const incomplete = completion.checklist.find((item: ListingCompletionItem) => !item.complete);
   return incomplete?.step ?? "review";
 }
 

@@ -73,7 +73,7 @@ function ListingReviewScreen({ listingId }: { listingId?: string }) {
         ownerKey,
       });
 
-      router.replace(getListingDetailRoute(result.listingId) as never);
+      router.replace(getListingDetailRoute(result.listingId, { fromPublish: true }) as never);
     } catch (caughtError) {
       setPublishError(caughtError instanceof Error ? caughtError.message : "We couldn't publish the listing.");
     } finally {

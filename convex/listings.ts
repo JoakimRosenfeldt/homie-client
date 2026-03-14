@@ -356,7 +356,7 @@ function toCompletionInput(listing: ListingRecord) {
 function getPublishErrors(listing: ListingRecord) {
   const completion = getCompletionState(toCompletionInput(listing));
 
-  const missing = completion.checklist.filter((item) => !item.complete);
+  const missing = completion.checklist.filter((item: (typeof completion.checklist)[number]) => !item.complete);
 
   if (listing.minLeaseMonths && listing.maxLeaseMonths && listing.minLeaseMonths > listing.maxLeaseMonths) {
     missing.push({
@@ -697,7 +697,7 @@ export const publish = mutation({
 
     const errors = getPublishErrors(listing);
     if (errors.length > 0) {
-      throw new ConvexError(errors.map((item) => item.label).join(" "));
+      throw new ConvexError(errors.map((item: (typeof errors)[number]) => item.label).join(" "));
     }
 
     const publishedAt = Date.now();

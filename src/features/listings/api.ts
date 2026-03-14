@@ -9,7 +9,7 @@ import type {
   ListingFeaturesInput,
   ListingLocationInput,
   ListingMineItem,
-} from "@/features/listings/model";
+} from "./model";
 
 export const listingsApi = {
   createDraft: makeFunctionReference<

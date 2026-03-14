@@ -1,10 +1,11 @@
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 
 import {
   AmenityTags,
   DetailMetric,
+  FooterActions,
   ListingScreen,
   LoadingCard,
   MessageCard,
@@ -17,13 +18,24 @@ import { useListingDetail } from "@/features/listings/hooks";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
 
 export default function ListingDetailRoute() {
-  const { listingId } = useLocalSearchParams<{ listingId: string }>();
+  const { listingId, fromPublish } = useLocalSearchParams<{ listingId: string; fromPublish?: string }>();
   const { isConfigured } = useConvexConfiguration();
+  const isPublishConfirmation = fromPublish === "true";
 
   return (
     <>
-      <Stack.Screen options={{ title: "Listing" }} />
-      {!isConfigured ? <ListingDetailMissing /> : <ListingDetailScreen listingId={listingId} />}
+      <Stack.Screen
+        options={{
+          title: isPublishConfirmation ? "Published" : "Listing",
+          headerBackVisible: !isPublishConfirmation,
+          gestureEnabled: !isPublishConfirmation,
+        }}
+      />
+      {!isConfigured ? (
+        <ListingDetailMissing />
+      ) : (
+        <ListingDetailScreen listingId={listingId} isPublishConfirmation={isPublishConfirmation} />
+      )}
     </>
   );
 }
@@ -36,7 +48,13 @@ function ListingDetailMissing() {
   );
 }
 
-function ListingDetailScreen({ listingId }: { listingId?: string }) {
+function ListingDetailScreen({
+  listingId,
+  isPublishConfirmation,
+}: {
+  listingId?: string;
+  isPublishConfirmation: boolean;
+}) {
   const detail = useListingDetail(listingId);
 
   if (detail === undefined) {
@@ -60,7 +78,22 @@ function ListingDetailScreen({ listingId }: { listingId?: string }) {
   }
 
   return (
-    <ListingScreen>
+    <ListingScreen
+      footer={
+        isPublishConfirmation ? (
+          <FooterActions
+            primaryLabel="Ok"
+            onPrimaryPress={() => router.replace("/(tabs)/(explore)" as never)}
+          />
+        ) : undefined
+      }>
+      {isPublishConfirmation ? (
+        <MessageCard
+          title="Listing published"
+          description="Your rental listing is now live. Tap Ok to return to the front page."
+          tone="success"
+        />
+      ) : null}
       <SectionCard title={getListingHeadline(detail)} description={detail.summary ?? "Published listing detail"}>
         {detail.photos.length > 0 ? (
           <View style={{ gap: 12 }}>

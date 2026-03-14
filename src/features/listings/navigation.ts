@@ -48,10 +48,13 @@ export function getStepRoute(listingId: string, step: ListingStepKey) {
   }
 }
 
-export function getListingDetailRoute(listingId: string) {
+export function getListingDetailRoute(listingId: string, options?: { fromPublish?: boolean }) {
   return {
     pathname: "/listings/[listingId]" as const,
-    params: { listingId },
+    params: {
+      listingId,
+      ...(options?.fromPublish ? { fromPublish: "true" } : {}),
+    },
   };
 }
 
