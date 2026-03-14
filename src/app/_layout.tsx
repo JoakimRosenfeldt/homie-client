@@ -19,7 +19,7 @@ export default function RootLayout() {
               title: "Create",
               presentation: "formSheet",
               sheetGrabberVisible: true,
-              sheetAllowedDetents: [0.34],
+              sheetAllowedDetents: [0.44],
               contentStyle: { backgroundColor: "transparent" },
             }}
           />
