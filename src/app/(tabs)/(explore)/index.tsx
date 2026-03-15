@@ -196,135 +196,133 @@ function ExploreListingsScreen() {
   const showNoMatches = listings.length > 0 && visibleListings.length === 0 && activeFilters;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <FlatList
-        contentInsetAdjustmentBehavior="automatic"
-        style={{ flex: 1 }}
-        data={visibleListings}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-            <PublicListingCard listing={item} />
-          </View>
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        ListHeaderComponent={
-          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16, marginBottom: 16 }}>
-            <SectionCard>
-              <View style={{ gap: 14 }}>
+    <FlatList
+      contentInsetAdjustmentBehavior="automatic"
+      style={{ flex: 1, backgroundColor: colors.background }}
+      data={visibleListings}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
+          <PublicListingCard listing={item} />
+        </View>
+      )}
+      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      ListHeaderComponent={
+        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16, marginBottom: 16 }}>
+          <SectionCard>
+            <View style={{ gap: 14 }}>
+              <Text
+                selectable
+                style={{
+                  fontSize: 15,
+                  lineHeight: 21,
+                  color: colors.body,
+                }}>
+                Browse the latest published listings and refine the feed with quick local filters.
+              </Text>
+
+              <View style={{ gap: 8 }}>
                 <Text
                   selectable
                   style={{
                     fontSize: 15,
-                    lineHeight: 21,
-                    color: colors.body,
+                    lineHeight: 20,
+                    fontWeight: "700",
+                    color: colors.title,
                   }}>
-                  Browse the latest published listings and refine the feed with quick local filters.
+                  Search
                 </Text>
-
-                <View style={{ gap: 8 }}>
-                  <Text
-                    selectable
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 20,
-                      fontWeight: "700",
-                      color: colors.title,
-                    }}>
-                    Search
-                  </Text>
-                  <TextInput
-                    value={filters.searchText}
-                    onChangeText={(searchText) => setFilters((current) => ({ ...current, searchText }))}
-                    placeholder="Search title, summary, or location"
-                    placeholderTextColor={colors.body}
-                    style={{
-                      minHeight: 54,
-                      paddingHorizontal: 16,
-                      paddingVertical: 14,
-                      borderRadius: 18,
-                      borderCurve: "continuous",
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      color: colors.title,
-                      backgroundColor: colors.cardSecondary,
-                      fontSize: 16,
-                      lineHeight: 22,
-                    }}
-                  />
-                </View>
-
-                <FilterChipGroup
-                  label="Property type"
-                  selectedValue={filters.propertyType ?? "all"}
-                  options={PROPERTY_TYPE_CHIPS}
-                  onSelect={(propertyType) => setFilters((current) => ({ ...current, propertyType }))}
-                />
-
-                <ResponsiveColumns>
-                  <RentInput
-                    label="Min rent"
-                    value={minRentText}
-                    onChangeText={(value) => {
-                      setMinRentText(value);
-                      setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
-                    }}
-                  />
-                  <RentInput
-                    label="Max rent"
-                    value={maxRentText}
-                    onChangeText={(value) => {
-                      setMaxRentText(value);
-                      setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
-                    }}
-                  />
-                </ResponsiveColumns>
-
-                <FilterChipGroup
-                  label="Availability"
-                  selectedValue={filters.availability}
-                  options={AVAILABILITY_CHIPS}
-                  onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
-                />
-
-                <Text
-                  selectable
+                <TextInput
+                  value={filters.searchText}
+                  onChangeText={(searchText) => setFilters((current) => ({ ...current, searchText }))}
+                  placeholder="Search title, summary, or location"
+                  placeholderTextColor={colors.body}
                   style={{
-                    fontSize: 13,
-                    lineHeight: 18,
-                    fontWeight: "600",
-                    color: colors.body,
-                  }}>
-                  {visibleListings.length} listing{visibleListings.length === 1 ? "" : "s"}
-                </Text>
+                    minHeight: 54,
+                    paddingHorizontal: 16,
+                    paddingVertical: 14,
+                    borderRadius: 18,
+                    borderCurve: "continuous",
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    color: colors.title,
+                    backgroundColor: colors.cardSecondary,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                />
               </View>
-            </SectionCard>
-          </View>
-        }
-        ListEmptyComponent={
-          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-            {showNoMatches ? (
-              <MessageCard
-                title="No listings match these filters."
-                description="Try widening the rent range, switching availability, or clearing the current filters."
-                actionLabel="Clear filters"
-                onActionPress={clearFilters}
+
+              <FilterChipGroup
+                label="Property type"
+                selectedValue={filters.propertyType ?? "all"}
+                options={PROPERTY_TYPE_CHIPS}
+                onSelect={(propertyType) => setFilters((current) => ({ ...current, propertyType }))}
               />
-            ) : (
-              <MessageCard
-                title="No listings have been published yet."
-                description="Explore will fill in once the first published rental is live."
+
+              <ResponsiveColumns>
+                <RentInput
+                  label="Min rent"
+                  value={minRentText}
+                  onChangeText={(value) => {
+                    setMinRentText(value);
+                    setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
+                  }}
+                />
+                <RentInput
+                  label="Max rent"
+                  value={maxRentText}
+                  onChangeText={(value) => {
+                    setMaxRentText(value);
+                    setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
+                  }}
+                />
+              </ResponsiveColumns>
+
+              <FilterChipGroup
+                label="Availability"
+                selectedValue={filters.availability}
+                options={AVAILABILITY_CHIPS}
+                onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
               />
-            )}
-          </View>
-        }
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 20,
-          paddingBottom: 40,
-        }}
-      />
-    </View>
+
+              <Text
+                selectable
+                style={{
+                  fontSize: 13,
+                  lineHeight: 18,
+                  fontWeight: "600",
+                  color: colors.body,
+                }}>
+                {visibleListings.length} listing{visibleListings.length === 1 ? "" : "s"}
+              </Text>
+            </View>
+          </SectionCard>
+        </View>
+      }
+      ListEmptyComponent={
+        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
+          {showNoMatches ? (
+            <MessageCard
+              title="No listings match these filters."
+              description="Try widening the rent range, switching availability, or clearing the current filters."
+              actionLabel="Clear filters"
+              onActionPress={clearFilters}
+            />
+          ) : (
+            <MessageCard
+              title="No listings have been published yet."
+              description="Explore will fill in once the first published rental is live."
+            />
+          )}
+        </View>
+      }
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 40,
+      }}
+    />
   );
 }
 
