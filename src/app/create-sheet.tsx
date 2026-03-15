@@ -92,7 +92,14 @@ export default function CreateSheet() {
         </View>
 
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => {
+            if (kind === "listing") {
+              router.replace("/listings/new" as never);
+              return;
+            }
+
+            router.back();
+          }}
           style={({ pressed }) => ({
             alignItems: "center",
             justifyContent: "center",
@@ -108,7 +115,7 @@ export default function CreateSheet() {
               fontWeight: "600",
               color: "#FFFFFF",
             }}>
-            Continue
+            {kind === "listing" ? "Start listing" : "Continue"}
           </Text>
         </Pressable>
       </View>

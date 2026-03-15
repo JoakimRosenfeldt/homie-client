@@ -136,10 +136,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               colors={colors}
               onPress={() => {
                 setIsCreateMenuOpen(false);
-                router.push({
-                  pathname: "/create-sheet",
-                  params: { kind: "listing" },
-                });
+                router.push("/listings/new" as never);
               }}
             />
           </Animated.View>

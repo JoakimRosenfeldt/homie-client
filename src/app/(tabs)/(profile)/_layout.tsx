@@ -4,6 +4,7 @@ export default function ProfileStack() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: "Profile", headerLargeTitle: true }} />
+      <Stack.Screen name="listings" options={{ title: "My Listings" }} />
     </Stack>
   );
 }
