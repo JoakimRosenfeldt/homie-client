@@ -67,6 +67,24 @@ function hasActiveFilters(filters: ListingExploreFilters) {
   );
 }
 
+function getActiveFilterCount(filters: ListingExploreFilters) {
+  let count = 0;
+
+  if (filters.propertyType && filters.propertyType !== "all") {
+    count += 1;
+  }
+
+  if (typeof filters.minRent === "number" || typeof filters.maxRent === "number") {
+    count += 1;
+  }
+
+  if (filters.availability !== "any") {
+    count += 1;
+  }
+
+  return count;
+}
+
 function matchesSearch(listing: ListingExploreItem, searchText: string) {
   if (!searchText) {
     return true;
@@ -161,6 +179,7 @@ function ExploreListingsScreen() {
   const [filters, setFilters] = useState<ListingExploreFilters>(DEFAULT_FILTERS);
   const [minRentText, setMinRentText] = useState("");
   const [maxRentText, setMaxRentText] = useState("");
+  const [areFiltersVisible, setAreFiltersVisible] = useState(false);
   const deferredSearchText = useDeferredValue(filters.searchText);
   const deferredFilters = useDeferredValue({
     ...filters,
@@ -193,6 +212,7 @@ function ExploreListingsScreen() {
   }
 
   const activeFilters = hasActiveFilters(filters);
+  const activeFilterCount = getActiveFilterCount(filters);
   const showNoMatches = listings.length > 0 && visibleListings.length === 0 && activeFilters;
 
   return (
@@ -250,41 +270,100 @@ function ExploreListingsScreen() {
                     fontSize: 16,
                     lineHeight: 22,
                   }}
-                />
+                  />
+                </View>
+
+              <View style={{ gap: 10 }}>
+                <Pressable
+                  onPress={() => setAreFiltersVisible((current) => !current)}
+                  style={{
+                    minHeight: 48,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    borderRadius: 18,
+                    borderCurve: "continuous",
+                    borderWidth: 1,
+                    borderColor: activeFilterCount > 0 ? colors.accent : colors.border,
+                    backgroundColor: activeFilterCount > 0 ? colors.accentSoft : colors.cardSecondary,
+                  }}>
+                  <Text
+                    selectable
+                    style={{
+                      fontSize: 15,
+                      lineHeight: 20,
+                      fontWeight: "700",
+                      color: colors.title,
+                    }}>
+                    {areFiltersVisible ? "Hide filters" : "Show filters"}
+                    {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+                  </Text>
+                  <Text
+                    selectable
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 18,
+                      fontWeight: "700",
+                      color: activeFilterCount > 0 ? colors.accent : colors.body,
+                    }}>
+                    {activeFilterCount > 0 ? "Active" : "Optional"}
+                  </Text>
+                </Pressable>
+
+                {areFiltersVisible ? (
+                  <View style={{ gap: 14 }}>
+                    <FilterChipGroup
+                      label="Property type"
+                      selectedValue={filters.propertyType ?? "all"}
+                      options={PROPERTY_TYPE_CHIPS}
+                      onSelect={(propertyType) => setFilters((current) => ({ ...current, propertyType }))}
+                    />
+
+                    <ResponsiveColumns>
+                      <RentInput
+                        label="Min rent"
+                        value={minRentText}
+                        onChangeText={(value) => {
+                          setMinRentText(value);
+                          setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
+                        }}
+                      />
+                      <RentInput
+                        label="Max rent"
+                        value={maxRentText}
+                        onChangeText={(value) => {
+                          setMaxRentText(value);
+                          setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
+                        }}
+                      />
+                    </ResponsiveColumns>
+
+                    <FilterChipGroup
+                      label="Availability"
+                      selectedValue={filters.availability}
+                      options={AVAILABILITY_CHIPS}
+                      onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
+                    />
+
+                    {activeFilterCount > 0 ? (
+                      <Pressable onPress={clearFilters}>
+                        <Text
+                          selectable
+                          style={{
+                            fontSize: 14,
+                            lineHeight: 18,
+                            fontWeight: "700",
+                            color: colors.accent,
+                          }}>
+                          Clear filters
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : null}
               </View>
-
-              <FilterChipGroup
-                label="Property type"
-                selectedValue={filters.propertyType ?? "all"}
-                options={PROPERTY_TYPE_CHIPS}
-                onSelect={(propertyType) => setFilters((current) => ({ ...current, propertyType }))}
-              />
-
-              <ResponsiveColumns>
-                <RentInput
-                  label="Min rent"
-                  value={minRentText}
-                  onChangeText={(value) => {
-                    setMinRentText(value);
-                    setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
-                  }}
-                />
-                <RentInput
-                  label="Max rent"
-                  value={maxRentText}
-                  onChangeText={(value) => {
-                    setMaxRentText(value);
-                    setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
-                  }}
-                />
-              </ResponsiveColumns>
-
-              <FilterChipGroup
-                label="Availability"
-                selectedValue={filters.availability}
-                options={AVAILABILITY_CHIPS}
-                onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
-              />
 
               <Text
                 selectable
