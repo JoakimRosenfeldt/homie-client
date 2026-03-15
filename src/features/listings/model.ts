@@ -176,6 +176,31 @@ export type ListingMineItem = {
   publishedAt?: number;
 };
 
+export type ListingExploreItem = {
+  _id: string;
+  title: string;
+  summary?: string;
+  propertyType?: PropertyType;
+  rentalArrangement?: RentalArrangement;
+  monthlyRent?: number;
+  currency: string;
+  sizeSqm?: number;
+  availableFrom?: string;
+  availableTo?: string;
+  publicLocationLabel?: string;
+  coverUrl: string | null;
+  photoCount: number;
+  publishedAt: number;
+};
+
+export type ListingExploreFilters = {
+  searchText: string;
+  propertyType?: PropertyType | "all";
+  minRent?: number;
+  maxRent?: number;
+  availability: "any" | "availableNow" | "next30Days";
+};
+
 export type ListingBasicsInput = Partial<
   Pick<
   ListingBaseFields,

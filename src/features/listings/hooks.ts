@@ -89,6 +89,16 @@ export function useMyListings(status?: "draft" | "published" | "archived") {
   };
 }
 
+export function usePublishedListings() {
+  const listings = useQuery(listingsApi.listPublished, {});
+
+  return {
+    listings,
+    isLoading: listings === undefined,
+    error: null as string | null,
+  };
+}
+
 export function useListingDetail(listingId?: string) {
   return useQuery(
     listingsApi.getDetail,

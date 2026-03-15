@@ -9,6 +9,7 @@ import {
   DEFAULT_CURRENCY,
   MAX_LISTING_PHOTOS,
   type ListingAmenity,
+  type ListingExploreItem,
   type ListingStepKey,
 } from "../src/features/listings/model";
 import { buildPublicLocationLabel, getCompletionState, normalizeText, requiresAvailableTo } from "../src/features/listings/validation";
@@ -174,6 +175,38 @@ function sanitizeListing(listing: ListingRecord) {
     })),
     completion,
     completedSteps: completion.completedSteps,
+  };
+}
+
+function getListingCoverStorageId(listing: ListingRecord) {
+  return listing.coverStorageId ?? listing.photos[0]?.storageId;
+}
+
+async function getListingCoverUrl(ctx: GenericQueryCtx<any>, listing: ListingRecord) {
+  const coverStorageId = getListingCoverStorageId(listing);
+  return coverStorageId ? ctx.storage.getUrl(coverStorageId) : null;
+}
+
+function getPublishedSortTimestamp(listing: ListingRecord) {
+  return listing.publishedAt ?? listing.lastEditedAt;
+}
+
+function toListingExploreItem(listing: ListingRecord, coverUrl: string | null): ListingExploreItem {
+  return {
+    _id: listing._id,
+    title: listing.title,
+    summary: listing.summary,
+    propertyType: listing.propertyType,
+    rentalArrangement: listing.rentalArrangement,
+    monthlyRent: listing.monthlyRent,
+    currency: listing.currency,
+    sizeSqm: listing.sizeSqm,
+    availableFrom: listing.availableFrom,
+    availableTo: listing.availableTo,
+    publicLocationLabel: listing.publicLocationLabel,
+    coverUrl,
+    photoCount: listing.photos.length,
+    publishedAt: getPublishedSortTimestamp(listing),
   };
 }
 
@@ -521,8 +554,7 @@ export const listMine = query({
       records
         .sort((left, right) => right.lastEditedAt - left.lastEditedAt)
         .map(async (listing) => {
-          const coverStorageId = listing.coverStorageId ?? listing.photos[0]?.storageId;
-          const coverUrl = coverStorageId ? await ctx.storage.getUrl(coverStorageId) : null;
+          const coverUrl = await getListingCoverUrl(ctx, listing);
           return {
             _id: listing._id,
             status: listing.status,
@@ -540,6 +572,22 @@ export const listMine = query({
             publishedAt: listing.publishedAt,
           };
         }),
+    );
+  },
+});
+
+export const listPublished = query({
+  args: {},
+  handler: async (ctx) => {
+    const records = (await ctx.db
+      .query("listings")
+      .withIndex("by_status", (queryBuilder) => queryBuilder.eq("status", "published"))
+      .collect()) as ListingRecord[];
+
+    return Promise.all(
+      records
+        .sort((left, right) => getPublishedSortTimestamp(right) - getPublishedSortTimestamp(left))
+        .map(async (listing) => toListingExploreItem(listing, await getListingCoverUrl(ctx, listing))),
     );
   },
 });

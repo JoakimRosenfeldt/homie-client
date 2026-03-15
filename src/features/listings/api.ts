@@ -4,6 +4,7 @@ import type { GenericId as Id } from "convex/values";
 import type {
   ListingBasicsInput,
   ListingDetail,
+  ListingExploreItem,
   ListingDetailsInput,
   ListingDraft,
   ListingFeaturesInput,
@@ -37,6 +38,11 @@ export const listingsApi = {
     { ownerKey: string; status?: "draft" | "published" | "archived" },
     ListingMineItem[]
   >("listings:listMine"),
+  listPublished: makeFunctionReference<
+    "query",
+    Record<string, never>,
+    ListingExploreItem[]
+  >("listings:listPublished"),
   generatePhotoUploadUrl: makeFunctionReference<
     "mutation",
     { listingId: Id<"listings">; ownerKey: string },

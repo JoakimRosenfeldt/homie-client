@@ -1,5 +1,6 @@
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,8 +14,24 @@ import {
   View,
 } from "react-native";
 
-import { LISTING_AMENITY_OPTIONS, LISTING_STEP_META, type ListingCompletionItem, type ListingMineItem, type ListingStepKey } from "@/features/listings/model";
-import { formatCurrency, formatDate, getAmenityLabel } from "@/features/listings/format";
+import {
+  LISTING_AMENITY_OPTIONS,
+  LISTING_STEP_META,
+  type ListingCompletionItem,
+  type ListingExploreItem,
+  type ListingMineItem,
+  type ListingStepKey,
+} from "@/features/listings/model";
+import {
+  formatCurrency,
+  formatDate,
+  formatSize,
+  getAmenityLabel,
+  getAvailabilityLabel,
+  getPropertyTypeLabel,
+  getRentalArrangementLabel,
+} from "@/features/listings/format";
+import { getListingDetailRoute } from "@/features/listings/navigation";
 
 export function useListingColors() {
   const isDark = useColorScheme() === "dark";
@@ -795,6 +812,95 @@ export function ListingSummaryCard({
         <Tag label={`Edited ${formatDate(new Date(listing.lastEditedAt).toISOString().slice(0, 10))}`} />
       </View>
     </View>
+  );
+}
+
+export function PublicListingCard({
+  listing,
+}: {
+  listing: ListingExploreItem;
+}) {
+  const colors = useListingColors();
+
+  return (
+    <Pressable
+      onPress={() => router.push(getListingDetailRoute(listing._id) as never)}
+      style={{
+        backgroundColor: colors.card,
+        borderRadius: 22,
+        borderCurve: "continuous",
+        padding: 16,
+        gap: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+      }}>
+      <View
+        style={{
+          width: "100%",
+          aspectRatio: 1.55,
+          borderRadius: 18,
+          borderCurve: "continuous",
+          overflow: "hidden",
+          backgroundColor: colors.cardSecondary,
+        }}>
+        {listing.coverUrl ? <Image source={listing.coverUrl} contentFit="cover" style={{ flex: 1 }} /> : null}
+      </View>
+
+      <View style={{ gap: 4 }}>
+        <Text
+          selectable
+          numberOfLines={2}
+          style={{
+            fontSize: 18,
+            lineHeight: 22,
+            fontWeight: "700",
+            color: colors.title,
+          }}>
+          {listing.title.trim() || "Untitled listing"}
+        </Text>
+        <Text
+          selectable
+          numberOfLines={1}
+          style={{
+            fontSize: 14,
+            lineHeight: 20,
+            color: colors.body,
+          }}>
+          {formatCurrency(listing.monthlyRent, listing.currency)} · {listing.publicLocationLabel ?? "Location coming soon"}
+        </Text>
+      </View>
+
+      <Text
+        selectable
+        numberOfLines={2}
+        style={{
+          fontSize: 14,
+          lineHeight: 20,
+          color: colors.body,
+        }}>
+        {listing.summary?.trim() || "No summary provided yet."}
+      </Text>
+
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        <Tag label={getPropertyTypeLabel(listing.propertyType)} />
+        <Tag label={getRentalArrangementLabel(listing.rentalArrangement)} />
+        <Tag label={getAvailabilityLabel(listing)} />
+        <Tag label={`${listing.photoCount} photo${listing.photoCount === 1 ? "" : "s"}`} />
+      </View>
+
+      {typeof listing.sizeSqm === "number" ? (
+        <Text
+          selectable
+          style={{
+            fontSize: 13,
+            lineHeight: 18,
+            fontWeight: "600",
+            color: colors.title,
+          }}>
+          {formatSize(listing.sizeSqm)}
+        </Text>
+      ) : null}
+    </Pressable>
   );
 }
 

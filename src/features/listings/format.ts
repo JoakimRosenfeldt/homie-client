@@ -1,4 +1,12 @@
-import { LISTING_AMENITY_OPTIONS, type ListingAmenity, type ListingDetail, type ListingDraft } from "@/features/listings/model";
+import {
+  LISTING_AMENITY_OPTIONS,
+  PROPERTY_TYPE_OPTIONS,
+  type ListingAmenity,
+  type ListingDetail,
+  type ListingDraft,
+  type PropertyType,
+  type RentalArrangement,
+} from "@/features/listings/model";
 
 export function formatCurrency(amount?: number, currency = "DKK") {
   if (typeof amount !== "number") {
@@ -55,4 +63,20 @@ export function getAmenityLabel(amenity: ListingAmenity) {
 
 export function getListingHeadline(listing: Pick<ListingDetail, "title" | "propertyType"> | Pick<ListingDraft, "title" | "propertyType">) {
   return listing.title.trim() || `Untitled ${listing.propertyType ?? "rental"}`;
+}
+
+export function getPropertyTypeLabel(propertyType?: PropertyType) {
+  return PROPERTY_TYPE_OPTIONS.find((option) => option.value === propertyType)?.label ?? "Rental";
+}
+
+export function getRentalArrangementLabel(rentalArrangement?: RentalArrangement) {
+  return rentalArrangement === "sublease" ? "Sublease" : "Standard rental";
+}
+
+export function getAvailabilityLabel(listing: Pick<ListingDraft, "availableFrom"> | Pick<ListingDetail, "availableFrom">) {
+  if (!listing.availableFrom) {
+    return "Availability not set";
+  }
+
+  return `Available ${formatDate(listing.availableFrom)}`;
 }

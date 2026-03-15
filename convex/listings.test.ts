@@ -1,3 +1,4 @@
+import type { GenericId as Id } from "convex/values";
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 
@@ -74,6 +75,64 @@ async function createValidDraft(t: ReturnType<typeof convexTest>, ownerKey: stri
   });
 
   return { listingId, storageId };
+}
+
+async function insertListingRecord(
+  t: ReturnType<typeof convexTest>,
+  input: {
+    status: "draft" | "published" | "archived";
+    title: string;
+    summary?: string;
+    monthlyRent?: number;
+    publishedAt?: number;
+    lastEditedAt: number;
+    photos?: {
+      storageId: Id<"_storage">;
+      width?: number;
+      height?: number;
+      mimeType?: string;
+    }[];
+    coverStorageId?: Id<"_storage">;
+  },
+) {
+  return t.run(async (ctx) =>
+    ctx.db.insert("listings", {
+      status: input.status,
+      ownerMode: "device",
+      ownerKeyHash: "owner-hash",
+      ownerSubject: "owner-subject",
+      title: input.title,
+      summary: input.summary ?? `${input.title} summary`,
+      description: `${input.title} description`,
+      propertyType: "apartment",
+      rentalArrangement: "standard",
+      monthlyRent: input.monthlyRent ?? 14000,
+      currency: "DKK",
+      sizeSqm: 64,
+      availableFrom: "2026-04-01",
+      amenities: [],
+      addressLine1: "Private Street 1",
+      postalCode: "2100",
+      city: "Copenhagen",
+      countryCode: "DK",
+      neighborhood: "Osterbro",
+      publicLocationLabel: "Osterbro, Copenhagen",
+      photos: (input.photos ?? []).map((photo) => ({
+        storageId: photo.storageId,
+        width: photo.width,
+        height: photo.height,
+        mimeType: photo.mimeType,
+      })),
+      coverStorageId: input.coverStorageId,
+      completedSteps: input.status === "draft" ? [] : ["basics", "details", "location", "photos", "review"],
+      publishedAt: input.publishedAt,
+      lastEditedAt: input.lastEditedAt,
+    }),
+  );
+}
+
+async function storePhoto(t: ReturnType<typeof convexTest>, label: string) {
+  return t.run(async (ctx) => ctx.storage.store(new Blob([label], { type: "image/jpeg" })));
 }
 
 describe("listings", () => {
@@ -251,5 +310,135 @@ describe("listings", () => {
 
     expect(draft.photos).toHaveLength(0);
     expect(after).toBeNull();
+  });
+
+  it("listPublished returns only published listings", async () => {
+    const t = convexTest(schema, convexModules);
+    const publishedPhoto = await storePhoto(t, "published-photo");
+    const draftPhoto = await storePhoto(t, "draft-photo");
+    const archivedPhoto = await storePhoto(t, "archived-photo");
+
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Published listing",
+      photos: [{ storageId: publishedPhoto, mimeType: "image/jpeg" }],
+      coverStorageId: publishedPhoto,
+      publishedAt: 300,
+      lastEditedAt: 300,
+    });
+    await insertListingRecord(t, {
+      status: "draft",
+      title: "Draft listing",
+      photos: [{ storageId: draftPhoto, mimeType: "image/jpeg" }],
+      lastEditedAt: 200,
+    });
+    await insertListingRecord(t, {
+      status: "archived",
+      title: "Archived listing",
+      photos: [{ storageId: archivedPhoto, mimeType: "image/jpeg" }],
+      publishedAt: 100,
+      lastEditedAt: 100,
+    });
+
+    const listings = await t.query(listingsApi.listPublished, {});
+
+    expect(listings).toHaveLength(1);
+    expect(listings[0]?.title).toBe("Published listing");
+  });
+
+  it("listPublished orders results newest first", async () => {
+    const t = convexTest(schema, convexModules);
+    const newestPhoto = await storePhoto(t, "newest-photo");
+    const olderPhoto = await storePhoto(t, "older-photo");
+    const fallbackPhoto = await storePhoto(t, "fallback-photo");
+
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Older listing",
+      photos: [{ storageId: olderPhoto, mimeType: "image/jpeg" }],
+      publishedAt: 100,
+      lastEditedAt: 100,
+    });
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Newest listing",
+      photos: [{ storageId: newestPhoto, mimeType: "image/jpeg" }],
+      publishedAt: 200,
+      lastEditedAt: 200,
+    });
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Fallback listing",
+      photos: [{ storageId: fallbackPhoto, mimeType: "image/jpeg" }],
+      lastEditedAt: 150,
+    });
+
+    const listings = await t.query(listingsApi.listPublished, {});
+
+    expect(listings.map((listing) => listing.title)).toEqual([
+      "Newest listing",
+      "Fallback listing",
+      "Older listing",
+    ]);
+  });
+
+  it("listPublished omits private address and owner fields", async () => {
+    const t = convexTest(schema, convexModules);
+    const photo = await storePhoto(t, "privacy-photo");
+
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Private fields listing",
+      photos: [{ storageId: photo, mimeType: "image/jpeg" }],
+      coverStorageId: photo,
+      publishedAt: 200,
+      lastEditedAt: 200,
+    });
+
+    const listings = await t.query(listingsApi.listPublished, {});
+    const listing = listings[0];
+
+    expect(listing).toBeDefined();
+    expect("addressLine1" in (listing ?? {})).toBe(false);
+    expect("postalCode" in (listing ?? {})).toBe(false);
+    expect("ownerKeyHash" in (listing ?? {})).toBe(false);
+    expect("ownerSubject" in (listing ?? {})).toBe(false);
+  });
+
+  it("listPublished resolves coverUrl from cover photo or first photo fallback", async () => {
+    const t = convexTest(schema, convexModules);
+    const firstPhoto = await storePhoto(t, "first-photo");
+    const secondPhoto = await storePhoto(t, "second-photo");
+    const fallbackFirstPhoto = await storePhoto(t, "fallback-first-photo");
+    const fallbackSecondPhoto = await storePhoto(t, "fallback-second-photo");
+
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Cover photo listing",
+      photos: [
+        { storageId: firstPhoto, mimeType: "image/jpeg" },
+        { storageId: secondPhoto, mimeType: "image/jpeg" },
+      ],
+      coverStorageId: secondPhoto,
+      publishedAt: 200,
+      lastEditedAt: 200,
+    });
+    await insertListingRecord(t, {
+      status: "published",
+      title: "Fallback cover listing",
+      photos: [
+        { storageId: fallbackFirstPhoto, mimeType: "image/jpeg" },
+        { storageId: fallbackSecondPhoto, mimeType: "image/jpeg" },
+      ],
+      publishedAt: 100,
+      lastEditedAt: 100,
+    });
+
+    const listings = await t.query(listingsApi.listPublished, {});
+    const explicitCoverUrl = await t.run(async (ctx) => ctx.storage.getUrl(secondPhoto));
+    const fallbackCoverUrl = await t.run(async (ctx) => ctx.storage.getUrl(fallbackFirstPhoto));
+
+    expect(listings.find((listing) => listing.title === "Cover photo listing")?.coverUrl).toBe(explicitCoverUrl);
+    expect(listings.find((listing) => listing.title === "Fallback cover listing")?.coverUrl).toBe(fallbackCoverUrl);
   });
 });
