@@ -755,8 +755,10 @@ export function ChecklistCard({
 
 export function ListingSummaryCard({
   listing,
+  action,
 }: {
   listing: ListingMineItem;
+  action?: React.ReactNode;
 }) {
   const colors = useListingColors();
 
@@ -812,6 +814,8 @@ export function ListingSummaryCard({
         <Tag label={`${listing.photoCount} photo${listing.photoCount === 1 ? "" : "s"}`} />
         <Tag label={`Edited ${formatDate(new Date(listing.lastEditedAt).toISOString().slice(0, 10))}`} />
       </View>
+
+      {action ? <View style={{ alignItems: "flex-start" }}>{action}</View> : null}
     </View>
   );
 }

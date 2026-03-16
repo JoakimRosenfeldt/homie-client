@@ -1,3 +1,4 @@
+import { useMutation } from "convex/react";
 import { router, Stack } from "expo-router";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -12,6 +13,7 @@ import {
   Tag,
   useListingColors,
 } from "@/features/listings/components";
+import { listingsApi } from "@/features/listings/api";
 import { useMyListings } from "@/features/listings/hooks";
 import { getListingDetailRoute, getResumeStepFromCompletedSteps, getStepRoute } from "@/features/listings/navigation";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
@@ -43,8 +45,11 @@ function MyListingsMissing() {
 
 function MyListingsScreen() {
   const colors = useListingColors();
-  const { listings, error, isLoading } = useMyListings();
+  const { listings, error, isLoading, ownerKey } = useMyListings();
+  const removeDraft = useMutation(listingsApi.removeDraft);
   const [filter, setFilter] = useState<ListingFilter>("all");
+  const [pendingListingIds, setPendingListingIds] = useState<string[]>([]);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   if (isLoading || listings === undefined) {
     return (
@@ -62,9 +67,30 @@ function MyListingsScreen() {
     return listing.status === filter;
   });
 
+  const handleRemoveDraft = async (listingId: string) => {
+    if (!ownerKey) {
+      return;
+    }
+
+    setRemoveError(null);
+    setPendingListingIds((current) => [...current, listingId]);
+
+    try {
+      await removeDraft({
+        listingId: listingId as never,
+        ownerKey,
+      });
+    } catch (caughtError) {
+      setRemoveError(caughtError instanceof Error ? caughtError.message : "We couldn't remove the draft.");
+    } finally {
+      setPendingListingIds((current) => current.filter((currentListingId) => currentListingId !== listingId));
+    }
+  };
+
   return (
     <ListingScreen>
       {error ? <MessageCard title="This device key isn't ready" description={error} tone="danger" /> : null}
+      {removeError ? <MessageCard title="Draft not removed" description={removeError} tone="danger" /> : null}
 
       <SectionCard
         title="My Listings"
@@ -119,12 +145,43 @@ function MyListingsScreen() {
 
               router.push(getListingDetailRoute(listing._id) as never);
             }}>
-            <ListingSummaryCard listing={listing} />
-            {listing.status === "draft" ? (
-              <View style={{ marginTop: 8, flexDirection: "row", gap: 8 }}>
-                <Tag label="Resume draft" />
-              </View>
-            ) : null}
+            <ListingSummaryCard
+              listing={listing}
+              action={
+                listing.status === "draft" ? (
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <Pressable
+                      disabled={!ownerKey || pendingListingIds.includes(listing._id)}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        void handleRemoveDraft(listing._id);
+                      }}
+                      style={{
+                        alignSelf: "flex-start",
+                        paddingHorizontal: 14,
+                        paddingVertical: 10,
+                        borderRadius: 999,
+                        borderCurve: "continuous",
+                        backgroundColor: colors.cardSecondary,
+                        borderWidth: 1,
+                        borderColor: colors.danger,
+                        opacity: !ownerKey || pendingListingIds.includes(listing._id) ? 0.6 : 1,
+                      }}>
+                      <Text
+                        selectable
+                        style={{
+                          fontSize: 14,
+                          lineHeight: 18,
+                          fontWeight: "700",
+                          color: colors.danger,
+                        }}>
+                        {pendingListingIds.includes(listing._id) ? "Removing..." : "Remove draft"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                ) : undefined
+              }
+            />
           </Pressable>
         ))
       )}

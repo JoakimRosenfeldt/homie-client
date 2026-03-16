@@ -34,6 +34,11 @@ export const listingsApi = {
     },
     { completedSteps: string[] }
   >("listings:saveSection"),
+  removeDraft: makeFunctionReference<
+    "mutation",
+    { listingId: Id<"listings">; ownerKey: string },
+    { listingId: Id<"listings"> }
+  >("listings:removeDraft"),
   listMine: makeFunctionReference<
     "query",
     { ownerKey: string; status?: "draft" | "published" | "archived" },

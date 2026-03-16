@@ -312,6 +312,41 @@ describe("listings", () => {
     expect(after).toBeNull();
   });
 
+  it("removeDraft deletes the draft and any uploaded photos", async () => {
+    const t = convexTest(schema, convexModules);
+    const ownerKey = "owner";
+    const { listingId, storageId } = await createValidDraft(t, ownerKey);
+
+    const before = await t.run(async (ctx) => ctx.storage.getUrl(storageId));
+    expect(before).not.toBeNull();
+
+    await t.mutation(listingsApi.removeDraft, {
+      listingId,
+      ownerKey,
+    });
+
+    const listing = await t.run(async (ctx) => ctx.db.get(listingId));
+    const after = await t.run(async (ctx) => ctx.storage.getUrl(storageId));
+
+    expect(listing).toBeNull();
+    expect(after).toBeNull();
+  });
+
+  it("removeDraft rejects published listings", async () => {
+    const t = convexTest(schema, convexModules);
+    const ownerKey = "owner";
+    const { listingId } = await createValidDraft(t, ownerKey);
+
+    await t.mutation(listingsApi.publish, { listingId, ownerKey });
+
+    await expect(
+      t.mutation(listingsApi.removeDraft, {
+        listingId,
+        ownerKey,
+      }),
+    ).rejects.toThrow("draft listings can be removed");
+  });
+
   it("setSaved stores published listings once and exposes them in saved queries", async () => {
     const t = convexTest(schema, convexModules);
     const ownerKey = "saved-owner";

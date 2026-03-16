@@ -562,6 +562,24 @@ export const saveSection = mutation({
   },
 });
 
+export const removeDraft = mutation({
+  args: {
+    listingId: v.id("listings"),
+    ownerKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const listing = await getOwnedListing(ctx, args.listingId, args.ownerKey);
+    if (listing.status !== "draft") {
+      throw new ConvexError("Only draft listings can be removed.");
+    }
+
+    await Promise.all(listing.photos.map((photo) => ctx.storage.delete(photo.storageId)));
+    await ctx.db.delete(args.listingId);
+
+    return { listingId: args.listingId };
+  },
+});
+
 export const listMine = query({
   args: {
     ownerKey: v.string(),
