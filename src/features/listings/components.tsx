@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  type GestureResponderEvent,
   Pressable,
   ScrollView,
   Switch,
@@ -817,8 +818,16 @@ export function ListingSummaryCard({
 
 export function PublicListingCard({
   listing,
+  isSaved = false,
+  isSavePending = false,
+  isSaveDisabled = false,
+  onToggleSaved,
 }: {
   listing: ListingExploreItem;
+  isSaved?: boolean;
+  isSavePending?: boolean;
+  isSaveDisabled?: boolean;
+  onToggleSaved?: () => void;
 }) {
   const colors = useListingColors();
 
@@ -846,28 +855,41 @@ export function PublicListingCard({
         {listing.coverUrl ? <Image source={listing.coverUrl} contentFit="cover" style={{ flex: 1 }} /> : null}
       </View>
 
-      <View style={{ gap: 4 }}>
-        <Text
-          selectable
-          numberOfLines={2}
-          style={{
-            fontSize: 18,
-            lineHeight: 22,
-            fontWeight: "700",
-            color: colors.title,
-          }}>
-          {listing.title.trim() || "Untitled listing"}
-        </Text>
-        <Text
-          selectable
-          numberOfLines={1}
-          style={{
-            fontSize: 14,
-            lineHeight: 20,
-            color: colors.body,
-          }}>
-          {formatCurrency(listing.monthlyRent, listing.currency)} · {listing.publicLocationLabel ?? "Location coming soon"}
-        </Text>
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text
+            selectable
+            numberOfLines={2}
+            style={{
+              fontSize: 18,
+              lineHeight: 22,
+              fontWeight: "700",
+              color: colors.title,
+            }}>
+            {listing.title.trim() || "Untitled listing"}
+          </Text>
+          <Text
+            selectable
+            numberOfLines={1}
+            style={{
+              fontSize: 14,
+              lineHeight: 20,
+              color: colors.body,
+            }}>
+            {formatCurrency(listing.monthlyRent, listing.currency)} · {listing.publicLocationLabel ?? "Location coming soon"}
+          </Text>
+        </View>
+        {onToggleSaved ? (
+          <ListingSaveButton
+            isSaved={isSaved}
+            isPending={isSavePending}
+            disabled={isSaveDisabled}
+            onPress={(event) => {
+              event.stopPropagation();
+              onToggleSaved();
+            }}
+          />
+        ) : null}
       </View>
 
       <Text
@@ -900,6 +922,50 @@ export function PublicListingCard({
           {formatSize(listing.sizeSqm)}
         </Text>
       ) : null}
+    </Pressable>
+  );
+}
+
+export function ListingSaveButton({
+  isSaved,
+  isPending = false,
+  disabled = false,
+  onPress,
+}: {
+  isSaved: boolean;
+  isPending?: boolean;
+  disabled?: boolean;
+  onPress: (event: GestureResponderEvent) => void;
+}) {
+  const colors = useListingColors();
+
+  return (
+    <Pressable
+      disabled={isPending || disabled}
+      onPress={onPress}
+      style={{
+        minHeight: 40,
+        minWidth: 78,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 14,
+        borderRadius: 999,
+        borderCurve: "continuous",
+        borderWidth: 1,
+        borderColor: isSaved ? colors.accent : colors.border,
+        backgroundColor: isSaved ? colors.accentSoft : colors.cardSecondary,
+        opacity: isPending || disabled ? 0.6 : 1,
+      }}>
+      <Text
+        selectable
+        style={{
+          fontSize: 13,
+          lineHeight: 16,
+          fontWeight: "700",
+          color: isSaved ? colors.accent : colors.title,
+        }}>
+        {isPending ? "Saving..." : isSaved ? "Saved" : "Save"}
+      </Text>
     </Pressable>
   );
 }

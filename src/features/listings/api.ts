@@ -10,6 +10,7 @@ import type {
   ListingFeaturesInput,
   ListingLocationInput,
   ListingMineItem,
+  SavedListingItem,
 } from "./model";
 
 export const listingsApi = {
@@ -43,6 +44,21 @@ export const listingsApi = {
     Record<string, never>,
     ListingExploreItem[]
   >("listings:listPublished"),
+  listSaved: makeFunctionReference<
+    "query",
+    { ownerKey: string },
+    SavedListingItem[]
+  >("listings:listSaved"),
+  listSavedIds: makeFunctionReference<
+    "query",
+    { ownerKey: string },
+    Id<"listings">[]
+  >("listings:listSavedIds"),
+  setSaved: makeFunctionReference<
+    "mutation",
+    { listingId: Id<"listings">; ownerKey: string; isSaved: boolean },
+    { isSaved: boolean }
+  >("listings:setSaved"),
   generatePhotoUploadUrl: makeFunctionReference<
     "mutation",
     { listingId: Id<"listings">; ownerKey: string },

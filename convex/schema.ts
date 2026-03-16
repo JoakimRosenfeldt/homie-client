@@ -86,4 +86,11 @@ export default defineSchema({
   })
     .index("by_owner_mode_key_status", ["ownerMode", "ownerKeyHash", "status"])
     .index("by_status", ["status"]),
+  savedListings: defineTable({
+    ownerKeyHash: v.string(),
+    listingId: v.id("listings"),
+    savedAt: v.number(),
+  })
+    .index("by_owner_key", ["ownerKeyHash"])
+    .index("by_owner_key_listing", ["ownerKeyHash", "listingId"]),
 });

@@ -10,6 +10,7 @@ import {
   MAX_LISTING_PHOTOS,
   type ListingAmenity,
   type ListingExploreItem,
+  type SavedListingItem,
   type ListingStepKey,
 } from "../src/features/listings/model";
 import { buildPublicLocationLabel, getCompletionState, normalizeText, requiresAvailableTo } from "../src/features/listings/validation";
@@ -129,6 +130,14 @@ type ListingRecord = {
   lastEditedAt: number;
 };
 
+type SavedListingRecord = {
+  _id: Id<"savedListings">;
+  _creationTime: number;
+  ownerKeyHash: string;
+  listingId: Id<"listings">;
+  savedAt: number;
+};
+
 async function sha256Hex(value: string) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -208,6 +217,34 @@ function toListingExploreItem(listing: ListingRecord, coverUrl: string | null): 
     photoCount: listing.photos.length,
     publishedAt: getPublishedSortTimestamp(listing),
   };
+}
+
+async function toSavedListingItem(
+  ctx: GenericQueryCtx<any>,
+  savedListing: SavedListingRecord,
+) {
+  const listing = (await ctx.db.get(savedListing.listingId)) as ListingRecord | null;
+  if (!listing || listing.status !== "published") {
+    return null;
+  }
+
+  return {
+    ...toListingExploreItem(listing, await getListingCoverUrl(ctx, listing)),
+    savedAt: savedListing.savedAt,
+  } satisfies SavedListingItem;
+}
+
+async function getSavedListingRecord(
+  ctx: GenericMutationCtx<any> | GenericQueryCtx<any>,
+  ownerKeyHash: string,
+  listingId: Id<"listings">,
+) {
+  return (await ctx.db
+    .query("savedListings")
+    .withIndex("by_owner_key_listing", (queryBuilder) =>
+      (queryBuilder as any).eq("ownerKeyHash", ownerKeyHash).eq("listingId", listingId),
+    )
+    .unique()) as SavedListingRecord | null;
 }
 
 function ensureDraftStatus(listing: ListingRecord) {
@@ -589,6 +626,84 @@ export const listPublished = query({
         .sort((left, right) => getPublishedSortTimestamp(right) - getPublishedSortTimestamp(left))
         .map(async (listing) => toListingExploreItem(listing, await getListingCoverUrl(ctx, listing))),
     );
+  },
+});
+
+export const listSaved = query({
+  args: {
+    ownerKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const ownerKeyHash = await sha256Hex(args.ownerKey);
+    const savedListings = (await ctx.db
+      .query("savedListings")
+      .withIndex("by_owner_key", (queryBuilder) => queryBuilder.eq("ownerKeyHash", ownerKeyHash))
+      .collect()) as SavedListingRecord[];
+
+    const items = await Promise.all(
+      savedListings
+        .sort((left, right) => right.savedAt - left.savedAt)
+        .map((savedListing) => toSavedListingItem(ctx, savedListing)),
+    );
+
+    return items.filter((item): item is SavedListingItem => item !== null);
+  },
+});
+
+export const listSavedIds = query({
+  args: {
+    ownerKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const ownerKeyHash = await sha256Hex(args.ownerKey);
+    const savedListings = (await ctx.db
+      .query("savedListings")
+      .withIndex("by_owner_key", (queryBuilder) => queryBuilder.eq("ownerKeyHash", ownerKeyHash))
+      .collect()) as SavedListingRecord[];
+
+    const ids = await Promise.all(
+      savedListings.map(async (savedListing) => {
+        const listing = (await ctx.db.get(savedListing.listingId)) as ListingRecord | null;
+        return listing?.status === "published" ? savedListing.listingId : null;
+      }),
+    );
+
+    return ids.filter((listingId): listingId is Id<"listings"> => listingId !== null);
+  },
+});
+
+export const setSaved = mutation({
+  args: {
+    listingId: v.id("listings"),
+    ownerKey: v.string(),
+    isSaved: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const ownerKeyHash = await sha256Hex(args.ownerKey);
+    const savedListing = await getSavedListingRecord(ctx, ownerKeyHash, args.listingId);
+
+    if (!args.isSaved) {
+      if (savedListing) {
+        await ctx.db.delete(savedListing._id);
+      }
+
+      return { isSaved: false };
+    }
+
+    const listing = (await ctx.db.get(args.listingId)) as ListingRecord | null;
+    if (!listing || listing.status !== "published") {
+      throw new ConvexError("Only published listings can be saved.");
+    }
+
+    if (!savedListing) {
+      await ctx.db.insert("savedListings", {
+        ownerKeyHash,
+        listingId: args.listingId,
+        savedAt: Date.now(),
+      });
+    }
+
+    return { isSaved: true };
   },
 });
 

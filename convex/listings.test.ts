@@ -312,6 +312,91 @@ describe("listings", () => {
     expect(after).toBeNull();
   });
 
+  it("setSaved stores published listings once and exposes them in saved queries", async () => {
+    const t = convexTest(schema, convexModules);
+    const ownerKey = "saved-owner";
+    const photo = await storePhoto(t, "saved-photo");
+    const listingId = await insertListingRecord(t, {
+      status: "published",
+      title: "Saved listing",
+      photos: [{ storageId: photo, mimeType: "image/jpeg" }],
+      coverStorageId: photo,
+      publishedAt: 200,
+      lastEditedAt: 200,
+    });
+
+    await t.mutation(listingsApi.setSaved, {
+      listingId,
+      ownerKey,
+      isSaved: true,
+    });
+    await t.mutation(listingsApi.setSaved, {
+      listingId,
+      ownerKey,
+      isSaved: true,
+    });
+
+    const savedListings = await t.query(listingsApi.listSaved, { ownerKey });
+    const savedIds = await t.query(listingsApi.listSavedIds, { ownerKey });
+
+    expect(savedListings).toHaveLength(1);
+    expect(savedListings[0]?.title).toBe("Saved listing");
+    expect(savedListings[0]?.savedAt).toBeTypeOf("number");
+    expect(savedIds).toEqual([listingId]);
+  });
+
+  it("setSaved removes listings from saved queries when unsaved", async () => {
+    const t = convexTest(schema, convexModules);
+    const ownerKey = "saved-owner";
+    const photo = await storePhoto(t, "unsaved-photo");
+    const listingId = await insertListingRecord(t, {
+      status: "published",
+      title: "Unsaved listing",
+      photos: [{ storageId: photo, mimeType: "image/jpeg" }],
+      coverStorageId: photo,
+      publishedAt: 200,
+      lastEditedAt: 200,
+    });
+
+    await t.mutation(listingsApi.setSaved, {
+      listingId,
+      ownerKey,
+      isSaved: true,
+    });
+    await t.mutation(listingsApi.setSaved, {
+      listingId,
+      ownerKey,
+      isSaved: false,
+    });
+
+    const savedListings = await t.query(listingsApi.listSaved, { ownerKey });
+    const savedIds = await t.query(listingsApi.listSavedIds, { ownerKey });
+
+    expect(savedListings).toHaveLength(0);
+    expect(savedIds).toHaveLength(0);
+  });
+
+  it("setSaved rejects draft listings", async () => {
+    const t = convexTest(schema, convexModules);
+    const ownerKey = "saved-owner";
+    const photo = await storePhoto(t, "draft-saved-photo");
+    const listingId = await insertListingRecord(t, {
+      status: "draft",
+      title: "Draft listing",
+      photos: [{ storageId: photo, mimeType: "image/jpeg" }],
+      coverStorageId: photo,
+      lastEditedAt: 200,
+    });
+
+    await expect(
+      t.mutation(listingsApi.setSaved, {
+        listingId,
+        ownerKey,
+        isSaved: true,
+      }),
+    ).rejects.toThrow("published listings");
+  });
+
   it("listPublished returns only published listings", async () => {
     const t = convexTest(schema, convexModules);
     const publishedPhoto = await storePhoto(t, "published-photo");

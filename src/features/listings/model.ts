@@ -193,6 +193,10 @@ export type ListingExploreItem = {
   publishedAt: number;
 };
 
+export type SavedListingItem = ListingExploreItem & {
+  savedAt: number;
+};
+
 export type ListingExploreFilters = {
   searchText: string;
   propertyType?: PropertyType | "all";

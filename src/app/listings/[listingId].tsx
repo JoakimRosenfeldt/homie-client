@@ -1,11 +1,14 @@
+import { useMutation } from "convex/react";
 import { Image } from "expo-image";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
 
 import {
   AmenityTags,
   DetailMetric,
   FooterActions,
+  ListingSaveButton,
   ListingScreen,
   LoadingCard,
   MessageCard,
@@ -14,7 +17,8 @@ import {
   Tag,
 } from "@/features/listings/components";
 import { formatCurrency, formatDate, formatLeaseWindow, formatSize, formatRooms, getListingHeadline } from "@/features/listings/format";
-import { useListingDetail } from "@/features/listings/hooks";
+import { listingsApi } from "@/features/listings/api";
+import { useListingDetail, useSavedListingIds } from "@/features/listings/hooks";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
 
 export default function ListingDetailRoute() {
@@ -56,6 +60,34 @@ function ListingDetailScreen({
   isPublishConfirmation: boolean;
 }) {
   const detail = useListingDetail(listingId);
+  const { ownerKey, savedListingIds, error: savedListingsError } = useSavedListingIds();
+  const setSaved = useMutation(listingsApi.setSaved);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSavePending, setIsSavePending] = useState(false);
+
+  const savedListingIdSet = new Set((savedListingIds ?? []).map((savedListingId) => String(savedListingId)));
+  const isSaved = Boolean(listingId && savedListingIdSet.has(listingId));
+
+  const handleToggleSaved = async () => {
+    if (!ownerKey || !listingId) {
+      return;
+    }
+
+    setSaveError(null);
+    setIsSavePending(true);
+
+    try {
+      await setSaved({
+        listingId: listingId as never,
+        ownerKey,
+        isSaved: !isSaved,
+      });
+    } catch (caughtError) {
+      setSaveError(caughtError instanceof Error ? caughtError.message : "We couldn't update the saved listing.");
+    } finally {
+      setIsSavePending(false);
+    }
+  };
 
   if (detail === undefined) {
     return (
@@ -94,6 +126,13 @@ function ListingDetailScreen({
           tone="success"
         />
       ) : null}
+      {saveError || savedListingsError ? (
+        <MessageCard
+          title="Saved listings unavailable"
+          description={saveError ?? savedListingsError ?? "We couldn't update saved listings."}
+          tone="danger"
+        />
+      ) : null}
       <SectionCard title={getListingHeadline(detail)} description={detail.summary ?? "Published listing detail"}>
         {detail.photos.length > 0 ? (
           <View style={{ gap: 12 }}>
@@ -117,6 +156,18 @@ function ListingDetailScreen({
           <Tag label={detail.rentalArrangement === "sublease" ? "Sublease" : "Standard rental"} />
           <Tag label={`Published ${formatDate(new Date(detail.publishedAt).toISOString().slice(0, 10))}`} />
         </View>
+        {!isPublishConfirmation ? (
+          <View style={{ alignItems: "flex-start" }}>
+            <ListingSaveButton
+              isSaved={isSaved}
+              isPending={isSavePending}
+              disabled={!ownerKey}
+              onPress={() => {
+                void handleToggleSaved();
+              }}
+            />
+          </View>
+        ) : null}
       </SectionCard>
 
       <SectionCard title="Overview">

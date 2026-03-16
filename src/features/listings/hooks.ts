@@ -99,6 +99,40 @@ export function usePublishedListings() {
   };
 }
 
+export function useSavedListings() {
+  const owner = useDeviceOwnerKey();
+  const listings = useQuery(
+    listingsApi.listSaved,
+    owner.ownerKey
+      ? {
+          ownerKey: owner.ownerKey,
+        }
+      : "skip",
+  );
+
+  return {
+    ...owner,
+    listings,
+  };
+}
+
+export function useSavedListingIds() {
+  const owner = useDeviceOwnerKey();
+  const savedListingIds = useQuery(
+    listingsApi.listSavedIds,
+    owner.ownerKey
+      ? {
+          ownerKey: owner.ownerKey,
+        }
+      : "skip",
+  );
+
+  return {
+    ...owner,
+    savedListingIds,
+  };
+}
+
 export function useListingDetail(listingId?: string) {
   return useQuery(
     listingsApi.getDetail,

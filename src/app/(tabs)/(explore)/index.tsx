@@ -1,3 +1,4 @@
+import { useMutation } from "convex/react";
 import { type ReactNode, useDeferredValue, useState } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 
@@ -9,8 +10,9 @@ import {
   SectionCard,
   useListingColors,
 } from "@/features/listings/components";
+import { listingsApi } from "@/features/listings/api";
 import { type ListingExploreFilters, type ListingExploreItem } from "@/features/listings/model";
-import { usePublishedListings } from "@/features/listings/hooks";
+import { usePublishedListings, useSavedListingIds } from "@/features/listings/hooks";
 import { parseOptionalNumber } from "@/features/listings/validation";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
 
@@ -176,16 +178,21 @@ function ExploreMissing() {
 function ExploreListingsScreen() {
   const colors = useListingColors();
   const { listings, isLoading, error } = usePublishedListings();
+  const { ownerKey, savedListingIds, error: savedListingsError } = useSavedListingIds();
+  const setSaved = useMutation(listingsApi.setSaved);
   const [filters, setFilters] = useState<ListingExploreFilters>(DEFAULT_FILTERS);
   const [minRentText, setMinRentText] = useState("");
   const [maxRentText, setMaxRentText] = useState("");
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
+  const [pendingListingIds, setPendingListingIds] = useState<string[]>([]);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const deferredSearchText = useDeferredValue(filters.searchText);
   const deferredFilters = useDeferredValue({
     ...filters,
     searchText: deferredSearchText,
   });
   const today = getStartOfToday();
+  const savedListingIdSet = new Set((savedListingIds ?? []).map((savedListingId) => String(savedListingId)));
 
   const visibleListings = (listings ?? []).filter((listing) => matchesFilters(listing, deferredFilters, today));
 
@@ -193,6 +200,27 @@ function ExploreListingsScreen() {
     setFilters(DEFAULT_FILTERS);
     setMinRentText("");
     setMaxRentText("");
+  };
+
+  const handleToggleSaved = async (listingId: string, isSaved: boolean) => {
+    if (!ownerKey) {
+      return;
+    }
+
+    setSaveError(null);
+    setPendingListingIds((current) => [...current, listingId]);
+
+    try {
+      await setSaved({
+        listingId: listingId as never,
+        ownerKey,
+        isSaved,
+      });
+    } catch (caughtError) {
+      setSaveError(caughtError instanceof Error ? caughtError.message : "We couldn't update the saved listing.");
+    } finally {
+      setPendingListingIds((current) => current.filter((currentListingId) => currentListingId !== listingId));
+    }
   };
 
   if (isLoading || listings === undefined) {
@@ -223,7 +251,13 @@ function ExploreListingsScreen() {
       keyExtractor={(item) => item._id}
       renderItem={({ item }) => (
         <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-          <PublicListingCard listing={item} />
+          <PublicListingCard
+            listing={item}
+            isSaved={savedListingIdSet.has(item._id)}
+            isSavePending={pendingListingIds.includes(item._id)}
+            isSaveDisabled={!ownerKey}
+            onToggleSaved={() => handleToggleSaved(item._id, !savedListingIdSet.has(item._id))}
+          />
         </View>
       )}
       ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
@@ -240,6 +274,13 @@ function ExploreListingsScreen() {
                 }}>
                 Browse the latest published listings and refine the feed with quick local filters.
               </Text>
+              {saveError || savedListingsError ? (
+                <MessageCard
+                  title="Saved listings unavailable"
+                  description={saveError ?? savedListingsError ?? "We couldn't update saved listings."}
+                  tone="danger"
+                />
+              ) : null}
 
               <View style={{ gap: 8 }}>
                 <Text
