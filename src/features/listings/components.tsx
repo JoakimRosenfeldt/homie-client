@@ -19,14 +19,6 @@ import {
 } from "react-native";
 
 import {
-  LISTING_AMENITY_OPTIONS,
-  LISTING_STEP_META,
-  type ListingCompletionItem,
-  type ListingExploreItem,
-  type ListingMineItem,
-  type ListingStepKey,
-} from "@/features/listings/model";
-import {
   formatCurrency,
   formatDate,
   formatSize,
@@ -35,6 +27,14 @@ import {
   getPropertyTypeLabel,
   getRentalArrangementLabel,
 } from "@/features/listings/format";
+import {
+  LISTING_AMENITY_OPTIONS,
+  LISTING_STEP_META,
+  type ListingCompletionItem,
+  type ListingExploreItem,
+  type ListingMineItem,
+  type ListingStepKey,
+} from "@/features/listings/model";
 import { getListingDetailRoute } from "@/features/listings/navigation";
 import { getHomieColors, homieAmbientShadow, homieRadii, homieSpacing } from "@/theme/homie";
 import { homieFontFamily, homieType } from "@/theme/typography";
@@ -819,6 +819,7 @@ export function PublicListingCard({
                 borderRadius: 10,
                 borderCurve: "continuous",
                 backgroundColor: colors.accent,
+                boxShadow: colors.isDark ? "0 8px 18px rgba(0, 0, 0, 0.28)" : "0 8px 18px rgba(181, 35, 48, 0.22)",
               }}>
               <Text
                 style={{
@@ -920,7 +921,10 @@ export function ListingSaveButton({
             borderCurve: "continuous",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.22)",
+            backgroundColor: isSaved ? "rgba(181, 35, 48, 0.78)" : "rgba(38, 24, 23, 0.34)",
+            borderWidth: 1,
+            borderColor: "rgba(255, 255, 255, 0.22)",
+            boxShadow: "0 8px 18px rgba(0, 0, 0, 0.22)",
             opacity: isPending || disabled ? 0.55 : 1,
           },
           style,
