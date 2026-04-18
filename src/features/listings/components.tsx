@@ -33,24 +33,11 @@ import {
   getRentalArrangementLabel,
 } from "@/features/listings/format";
 import { getListingDetailRoute } from "@/features/listings/navigation";
+import { getHomieColors, homieAmbientShadow, homieRadii, homieSpacing } from "@/theme/homie";
 
 export function useListingColors() {
   const isDark = useColorScheme() === "dark";
-
-  return {
-    isDark,
-    background: isDark ? "#000000" : "#F2F2F7",
-    card: isDark ? "#1C1C1E" : "#FFFFFF",
-    cardSecondary: isDark ? "#2C2C2E" : "#F7F7FB",
-    title: isDark ? "#FFFFFF" : "#111111",
-    body: isDark ? "#A1A1A6" : "#5F5F66",
-    border: isDark ? "#2C2C2E" : "#E5E5EA",
-    accent: isDark ? "#0A84FF" : "#007AFF",
-    accentSoft: isDark ? "rgba(10, 132, 255, 0.16)" : "rgba(0, 122, 255, 0.12)",
-    success: isDark ? "#32D74B" : "#2F9E44",
-    warning: isDark ? "#FFD60A" : "#B7791F",
-    danger: isDark ? "#FF453A" : "#C62828",
-  };
+  return getHomieColors(isDark ? "dark" : "light");
 }
 
 export function ListingScreen({
@@ -70,10 +57,10 @@ export function ListingScreen({
           alignSelf: "center",
           width: "100%",
           maxWidth: 980,
-          paddingHorizontal: isWide ? 28 : 20,
-          paddingTop: 20,
+          paddingHorizontal: isWide ? 28 : homieSpacing.page,
+          paddingTop: homieSpacing.page,
           paddingBottom: footer ? 124 : 40,
-          gap: 16,
+          gap: homieSpacing.section,
         }}>
         {children}
       </ScrollView>
@@ -85,7 +72,7 @@ export function ListingScreen({
             left: 0,
             right: 0,
             bottom: 0,
-            paddingHorizontal: isWide ? 28 : 20,
+            paddingHorizontal: isWide ? 28 : homieSpacing.page,
             paddingTop: 12,
             paddingBottom: 20,
             backgroundColor: colors.background,
@@ -113,12 +100,11 @@ export function SectionCard({
     <View
       style={{
         backgroundColor: colors.card,
-        borderRadius: 24,
+        borderRadius: homieRadii.card,
         borderCurve: "continuous",
         padding: 18,
         gap: 14,
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderWidth: 0,
       }}>
       {title ? (
         <View style={{ gap: 4 }}>
@@ -167,17 +153,18 @@ export function MessageCard({
   const colors = useListingColors();
   const accent =
     tone === "danger" ? colors.danger : tone === "warning" ? colors.warning : tone === "success" ? colors.success : colors.accent;
+  const edgeColor = tone === "default" ? colors.border : accent;
 
   return (
     <View
       style={{
         backgroundColor: colors.card,
-        borderRadius: 22,
+        borderRadius: homieRadii.card,
         borderCurve: "continuous",
         padding: 16,
         gap: 10,
-        borderWidth: 1,
-        borderColor: accent,
+        borderLeftWidth: 4,
+        borderLeftColor: edgeColor,
       }}>
       <Text
         selectable
@@ -271,11 +258,10 @@ export function StepProgress({
                 style={{
                   paddingHorizontal: 12,
                   paddingVertical: 10,
-                  borderRadius: 999,
+                  borderRadius: homieRadii.full,
                   borderCurve: "continuous",
                   backgroundColor: isCurrent ? colors.accent : isComplete ? colors.accentSoft : colors.cardSecondary,
-                  borderWidth: 1,
-                  borderColor: isCurrent ? colors.accent : isComplete ? colors.accent : colors.border,
+                  borderWidth: 0,
                 }}>
                 <Text
                   selectable
@@ -283,7 +269,7 @@ export function StepProgress({
                     fontSize: 13,
                     lineHeight: 16,
                     fontWeight: "700",
-                    color: isCurrent ? "#FFFFFF" : colors.title,
+                    color: isCurrent ? colors.onAccent : colors.title,
                   }}>
                   {index + 1}. {step.shortTitle}
                 </Text>
@@ -387,10 +373,9 @@ export function TextField({
           paddingHorizontal: 16,
           paddingVertical: multiline ? 16 : 14,
           textAlignVertical: multiline ? "top" : "center",
-          borderRadius: 18,
+          borderRadius: homieRadii.control,
           borderCurve: "continuous",
-          borderWidth: 1,
-          borderColor: colors.border,
+          borderWidth: 0,
           color: colors.title,
           backgroundColor: colors.cardSecondary,
           fontSize: 16,
@@ -423,10 +408,9 @@ export function ToggleField({
         gap: 12,
         paddingHorizontal: 14,
         paddingVertical: 14,
-        borderRadius: 18,
+        borderRadius: homieRadii.control,
         borderCurve: "continuous",
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderWidth: 0,
         backgroundColor: colors.cardSecondary,
       }}>
       <View style={{ flex: 1, gap: 4 }}>
@@ -475,10 +459,9 @@ export function ChoiceGrid<TValue extends string>({
             key={option.value}
             onPress={() => onSelect(option.value)}
             style={{
-              borderRadius: 20,
+              borderRadius: homieRadii.control,
               borderCurve: "continuous",
-              borderWidth: 1,
-              borderColor: isSelected ? colors.accent : colors.border,
+              borderWidth: 0,
               backgroundColor: isSelected ? colors.accentSoft : colors.cardSecondary,
               padding: 16,
               gap: 4,
@@ -534,10 +517,9 @@ export function AmenityGrid({
               width: isWide ? "48.8%" : "100%",
               paddingHorizontal: 14,
               paddingVertical: 14,
-              borderRadius: 18,
+              borderRadius: homieRadii.control,
               borderCurve: "continuous",
-              borderWidth: 1,
-              borderColor: isSelected ? colors.accent : colors.border,
+              borderWidth: 0,
               backgroundColor: isSelected ? colors.accentSoft : colors.cardSecondary,
             }}>
             <Text
@@ -596,10 +578,9 @@ export function DateField({
           minHeight: 54,
           justifyContent: "center",
           paddingHorizontal: 16,
-          borderRadius: 18,
+          borderRadius: homieRadii.control,
           borderCurve: "continuous",
-          borderWidth: 1,
-          borderColor: colors.border,
+          borderWidth: 0,
           backgroundColor: colors.cardSecondary,
         }}>
         <Text
@@ -645,11 +626,10 @@ export function FooterActions({
             minHeight: 54,
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: 18,
+            borderRadius: homieRadii.control,
             borderCurve: "continuous",
             backgroundColor: colors.cardSecondary,
-            borderWidth: 1,
-            borderColor: colors.border,
+            borderWidth: 0,
             opacity: secondaryDisabled ? 0.5 : 1,
           }}>
           <Text
@@ -673,7 +653,7 @@ export function FooterActions({
           minHeight: 54,
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 18,
+          borderRadius: homieRadii.control,
           borderCurve: "continuous",
           backgroundColor: colors.accent,
           opacity: primaryDisabled ? 0.45 : 1,
@@ -684,7 +664,7 @@ export function FooterActions({
             fontSize: 16,
             lineHeight: 20,
             fontWeight: "700",
-            color: "#FFFFFF",
+            color: colors.onAccent,
           }}>
           {primaryLabel}
         </Text>
@@ -712,7 +692,7 @@ export function ChecklistCard({
               gap: 10,
               paddingHorizontal: 14,
               paddingVertical: 12,
-              borderRadius: 18,
+              borderRadius: homieRadii.control,
               borderCurve: "continuous",
               backgroundColor: colors.cardSecondary,
             }}>
@@ -721,7 +701,7 @@ export function ChecklistCard({
                 marginTop: 2,
                 width: 18,
                 height: 18,
-                borderRadius: 999,
+                borderRadius: homieRadii.full,
                 backgroundColor: item.complete ? colors.success : colors.border,
               }}
             />
@@ -766,12 +746,12 @@ export function ListingSummaryCard({
     <View
       style={{
         backgroundColor: colors.card,
-        borderRadius: 22,
+        borderRadius: homieRadii.card,
         borderCurve: "continuous",
         padding: 16,
         gap: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderWidth: 0,
+        boxShadow: colors.isDark ? homieAmbientShadow.dark : homieAmbientShadow.light,
       }}>
       {listing.coverUrl ? (
         <Image
@@ -780,7 +760,7 @@ export function ListingSummaryCard({
           style={{
             width: "100%",
             aspectRatio: 1.6,
-            borderRadius: 18,
+            borderRadius: homieRadii.control,
             backgroundColor: colors.cardSecondary,
           }}
         />
@@ -840,18 +820,18 @@ export function PublicListingCard({
       onPress={() => router.push(getListingDetailRoute(listing._id) as never)}
       style={{
         backgroundColor: colors.card,
-        borderRadius: 22,
+        borderRadius: homieRadii.card,
         borderCurve: "continuous",
         padding: 16,
         gap: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderWidth: 0,
+        boxShadow: colors.isDark ? homieAmbientShadow.dark : homieAmbientShadow.light,
       }}>
       <View
         style={{
           width: "100%",
           aspectRatio: 1.55,
-          borderRadius: 18,
+          borderRadius: homieRadii.control,
           borderCurve: "continuous",
           overflow: "hidden",
           backgroundColor: colors.cardSecondary,
@@ -953,11 +933,10 @@ export function ListingSaveButton({
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 14,
-        borderRadius: 999,
+        borderRadius: homieRadii.full,
         borderCurve: "continuous",
-        borderWidth: 1,
-        borderColor: isSaved ? colors.accent : colors.border,
-        backgroundColor: isSaved ? colors.accentSoft : colors.cardSecondary,
+        borderWidth: 0,
+        backgroundColor: isSaved ? colors.secondarySoft : colors.cardSecondary,
         opacity: isPending || disabled ? 0.6 : 1,
       }}>
       <Text
@@ -966,7 +945,7 @@ export function ListingSaveButton({
           fontSize: 13,
           lineHeight: 16,
           fontWeight: "700",
-          color: isSaved ? colors.accent : colors.title,
+          color: isSaved ? colors.secondary : colors.title,
         }}>
         {isPending ? "Saving..." : isSaved ? "Saved" : "Save"}
       </Text>
@@ -982,11 +961,10 @@ export function Tag({ label }: { label: string }) {
       style={{
         paddingHorizontal: 10,
         paddingVertical: 8,
-        borderRadius: 999,
+        borderRadius: homieRadii.full,
         borderCurve: "continuous",
-        backgroundColor: colors.cardSecondary,
-        borderWidth: 1,
-        borderColor: colors.border,
+        backgroundColor: colors.secondarySoft,
+        borderWidth: 0,
       }}>
       <Text
         selectable
@@ -994,7 +972,7 @@ export function Tag({ label }: { label: string }) {
           fontSize: 12,
           lineHeight: 14,
           fontWeight: "700",
-          color: colors.title,
+          color: colors.secondary,
         }}>
         {label}
       </Text>
@@ -1018,11 +996,10 @@ export function PhotoTile({
       style={{
         gap: 10,
         padding: 12,
-        borderRadius: 20,
+        borderRadius: homieRadii.control,
         borderCurve: "continuous",
         backgroundColor: colors.cardSecondary,
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderWidth: 0,
       }}>
       <View
         style={{
@@ -1095,7 +1072,7 @@ export function DetailMetric({
         flex: 1,
         minWidth: 0,
         padding: 14,
-        borderRadius: 18,
+        borderRadius: homieRadii.control,
         borderCurve: "continuous",
         backgroundColor: colors.cardSecondary,
       }}>

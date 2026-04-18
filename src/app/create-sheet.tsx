@@ -1,6 +1,9 @@
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { Pressable, ScrollView, Text, useColorScheme, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+
+import { useListingColors } from "@/features/listings/components";
+import { homieRadii, homieSpacing } from "@/theme/homie";
 
 const CREATE_CONTENT = {
   agent: {
@@ -16,18 +19,9 @@ const CREATE_CONTENT = {
 } as const;
 
 export default function CreateSheet() {
-  const isDark = useColorScheme() === "dark";
   const { kind } = useLocalSearchParams<{ kind?: "agent" | "listing" }>();
   const content = CREATE_CONTENT[kind ?? "agent"] ?? CREATE_CONTENT.agent;
-
-  const colors = {
-    background: isDark ? "#1C1C1E" : "#FFFFFF",
-    secondaryBackground: isDark ? "#2C2C2E" : "#F2F2F7",
-    title: isDark ? "#FFFFFF" : "#111111",
-    body: isDark ? "#A1A1A6" : "#6D6D72",
-    border: isDark ? "#3A3A3C" : "#E5E5EA",
-    accent: isDark ? "#0A84FF" : "#007AFF",
-  };
+  const colors = useListingColors();
 
   return (
     <ScrollView
@@ -35,19 +29,18 @@ export default function CreateSheet() {
       style={{ flex: 1, backgroundColor: "transparent" }}
       contentContainerStyle={{
         flexGrow: 1,
-        paddingHorizontal: 20,
+        paddingHorizontal: homieSpacing.page,
         paddingTop: 12,
         paddingBottom: 24,
       }}>
       <View
         style={{
-          backgroundColor: colors.background,
-          borderRadius: 28,
+          backgroundColor: colors.card,
+          borderRadius: homieRadii.sheet,
           borderCurve: "continuous",
           padding: 20,
           gap: 18,
-          borderWidth: 1,
-          borderColor: colors.border,
+          borderWidth: 0,
         }}>
         <View
           style={{
@@ -57,7 +50,7 @@ export default function CreateSheet() {
             borderCurve: "continuous",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: colors.secondaryBackground,
+            backgroundColor: colors.cardSecondary,
           }}>
           <Image
             source={`sf:${content.symbol}`}
@@ -104,16 +97,16 @@ export default function CreateSheet() {
             alignItems: "center",
             justifyContent: "center",
             minHeight: 52,
-            borderRadius: 18,
+            borderRadius: homieRadii.control,
             borderCurve: "continuous",
-            backgroundColor: pressed ? "#3395FF" : colors.accent,
+            backgroundColor: pressed ? colors.accentPressed : colors.accent,
           })}>
           <Text
             style={{
               fontSize: 16,
               lineHeight: 20,
               fontWeight: "600",
-              color: "#FFFFFF",
+              color: colors.onAccent,
             }}>
             {kind === "listing" ? "Start listing" : "Continue"}
           </Text>

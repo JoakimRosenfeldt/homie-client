@@ -13,6 +13,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useListingColors } from "@/features/listings/components";
+import { homieAmbientShadow, homieRadii } from "@/theme/homie";
+
 const TAB_META = {
   "(explore)": {
     label: "Explore",
@@ -50,20 +53,21 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const isDark = useColorScheme() === "dark";
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
+  const theme = useListingColors();
 
   useEffect(() => {
     setIsCreateMenuOpen(false);
   }, [pathname]);
 
   const colors = {
-    accent: isDark ? "#0A84FF" : "#007AFF",
-    accentPressed: isDark ? "#409CFF" : "#3395FF",
-    surface: isDark ? "#1C1C1E" : "#FFFFFF",
-    surfacePressed: isDark ? "#2C2C2E" : "#F2F2F7",
-    bar: isDark ? "#1B1B1D" : "#FCFCFE",
-    border: isDark ? "rgba(255, 255, 255, 0.10)" : "rgba(17, 17, 17, 0.08)",
-    label: isDark ? "#F2F2F7" : "#111111",
-    labelMuted: isDark ? "#8E8E93" : "#6D6D72",
+    accent: theme.accent,
+    accentPressed: theme.accentPressed,
+    surface: theme.card,
+    surfacePressed: theme.cardSecondary,
+    bar: theme.tabBar,
+    border: theme.tabBarBorder,
+    label: theme.title,
+    labelMuted: theme.body,
   };
 
   const bottomInset = Math.max(insets.bottom, 8);
@@ -121,7 +125,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <CreateOptionButton
               label="Agent"
               symbol="sparkles"
-              colors={colors}
+              colors={{ ...colors, accentSoft: theme.accentSoft }}
               onPress={() => {
                 setIsCreateMenuOpen(false);
                 router.push({
@@ -133,7 +137,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <CreateOptionButton
               label="Listing"
               symbol="doc.text"
-              colors={colors}
+              colors={{ ...colors, accentSoft: theme.accentSoft }}
               onPress={() => {
                 setIsCreateMenuOpen(false);
                 router.push("/listings/new" as never);
@@ -154,9 +158,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             backgroundColor: colors.bar,
             borderWidth: 1,
             borderColor: colors.border,
-            boxShadow: isDark
-              ? "0 -8px 26px rgba(0, 0, 0, 0.28)"
-              : "0 -10px 24px rgba(17, 17, 17, 0.08)",
+            boxShadow: isDark ? homieAmbientShadow.dark : homieAmbientShadow.light,
           }}>
           <View
             style={{
@@ -227,8 +229,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                   borderWidth: 4,
                   borderColor: colors.bar,
                   boxShadow: pressed
-                    ? "0 10px 20px rgba(0, 122, 255, 0.18)"
-                    : "0 12px 24px rgba(0, 122, 255, 0.24)",
+                    ? "0 10px 24px rgba(181, 35, 48, 0.35)"
+                    : "0 12px 28px rgba(181, 35, 48, 0.4)",
                   transform: [{ scale: pressed ? 0.96 : 1 }],
                 })}>
                 <Animated.View style={createIconStyle}>
@@ -237,7 +239,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                     style={{
                       width: 22,
                       height: 22,
-                      tintColor: "#FFFFFF",
+                      tintColor: theme.onAccent,
                     }}
                   />
                 </Animated.View>
@@ -375,13 +377,15 @@ function CreateOptionButton({
   symbol: string;
   colors: {
     accent: string;
+    accentSoft: string;
     surface: string;
     surfacePressed: string;
-    border: string;
     label: string;
   };
   onPress: () => void;
 }) {
+  const isDarkScheme = useColorScheme() === "dark";
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -393,12 +397,11 @@ function CreateOptionButton({
         gap: 8,
         paddingHorizontal: 14,
         paddingVertical: 12,
-        borderRadius: 999,
+        borderRadius: homieRadii.full,
         borderCurve: "continuous",
         backgroundColor: pressed ? colors.surfacePressed : colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-        boxShadow: "0 10px 24px rgba(0, 0, 0, 0.12)",
+        borderWidth: 0,
+        boxShadow: isDarkScheme ? homieAmbientShadow.dark : homieAmbientShadow.light,
       })}>
       <View
         style={{
@@ -408,7 +411,7 @@ function CreateOptionButton({
           borderCurve: "continuous",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "rgba(10, 132, 255, 0.14)",
+          backgroundColor: colors.accentSoft,
         }}>
         <Image
           source={`sf:${symbol}`}

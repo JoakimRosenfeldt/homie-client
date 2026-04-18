@@ -15,6 +15,7 @@ import { type ListingExploreFilters, type ListingExploreItem } from "@/features/
 import { usePublishedListings, useSavedListingIds } from "@/features/listings/hooks";
 import { parseOptionalNumber } from "@/features/listings/validation";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
+import { homieRadii } from "@/theme/homie";
 
 const DEFAULT_FILTERS: ListingExploreFilters = {
   searchText: "",
@@ -302,10 +303,9 @@ function ExploreListingsScreen() {
                     minHeight: 54,
                     paddingHorizontal: 16,
                     paddingVertical: 14,
-                    borderRadius: 18,
+                    borderRadius: homieRadii.control,
                     borderCurve: "continuous",
-                    borderWidth: 1,
-                    borderColor: colors.border,
+                    borderWidth: 0,
                     color: colors.title,
                     backgroundColor: colors.cardSecondary,
                     fontSize: 16,
@@ -324,10 +324,9 @@ function ExploreListingsScreen() {
                     justifyContent: "space-between",
                     paddingHorizontal: 14,
                     paddingVertical: 12,
-                    borderRadius: 18,
+                    borderRadius: homieRadii.control,
                     borderCurve: "continuous",
-                    borderWidth: 1,
-                    borderColor: activeFilterCount > 0 ? colors.accent : colors.border,
+                    borderWidth: 0,
                     backgroundColor: activeFilterCount > 0 ? colors.accentSoft : colors.cardSecondary,
                   }}>
                   <Text
@@ -492,11 +491,10 @@ function FilterChipGroup<TValue extends string>({
               style={{
                 paddingHorizontal: 12,
                 paddingVertical: 10,
-                borderRadius: 999,
+                borderRadius: homieRadii.full,
                 borderCurve: "continuous",
                 backgroundColor: isSelected ? colors.accent : colors.cardSecondary,
-                borderWidth: 1,
-                borderColor: isSelected ? colors.accent : colors.border,
+                borderWidth: 0,
               }}>
               <Text
                 selectable
@@ -504,7 +502,7 @@ function FilterChipGroup<TValue extends string>({
                   fontSize: 14,
                   lineHeight: 18,
                   fontWeight: "700",
-                  color: isSelected ? "#FFFFFF" : colors.title,
+                  color: isSelected ? colors.onAccent : colors.title,
                 }}>
                 {option.label}
               </Text>
@@ -549,10 +547,9 @@ function RentInput({
           minHeight: 54,
           paddingHorizontal: 16,
           paddingVertical: 14,
-          borderRadius: 18,
+          borderRadius: homieRadii.control,
           borderCurve: "continuous",
-          borderWidth: 1,
-          borderColor: colors.border,
+          borderWidth: 0,
           color: colors.title,
           backgroundColor: colors.cardSecondary,
           fontSize: 16,
