@@ -2,6 +2,7 @@ import React from "react";
 import { ScrollView, Text, useColorScheme, View } from "react-native";
 
 import { getHomieColors, homieRadii, homieSpacing } from "@/theme/homie";
+import { homieType } from "@/theme/typography";
 
 type TabScreenProps = {
   summary: string;
@@ -25,15 +26,7 @@ export function TabScreen({ summary, sections }: TabScreenProps) {
         paddingBottom: 32,
         gap: homieSpacing.section,
       }}>
-      <Text
-        selectable
-        style={{
-          fontSize: 17,
-          lineHeight: 24,
-          color: colors.body,
-        }}>
-        {summary}
-      </Text>
+      <Text selectable style={[homieType.body, { fontSize: 17, lineHeight: 24, color: colors.body }]}>{summary}</Text>
 
       {sections.map((section) => (
         <View
@@ -46,25 +39,10 @@ export function TabScreen({ summary, sections }: TabScreenProps) {
             gap: 8,
             borderWidth: 0,
           }}>
-          <Text
-            selectable
-            style={{
-              fontSize: 20,
-              lineHeight: 24,
-              fontWeight: "600",
-              color: colors.title,
-            }}>
+          <Text selectable style={[homieType.headlineSection, { fontSize: 20, lineHeight: 24, color: colors.title }]}>
             {section.title}
           </Text>
-          <Text
-            selectable
-            style={{
-              fontSize: 15,
-              lineHeight: 22,
-              color: colors.body,
-            }}>
-            {section.description}
-          </Text>
+          <Text selectable style={[homieType.body, { color: colors.body }]}>{section.description}</Text>
         </View>
       ))}
     </ScrollView>

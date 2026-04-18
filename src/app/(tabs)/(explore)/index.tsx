@@ -1,13 +1,14 @@
+import { Image } from "expo-image";
 import { useMutation } from "convex/react";
-import { type ReactNode, useDeferredValue, useState } from "react";
-import { FlatList, Pressable, Text, TextInput, View } from "react-native";
+import { type Dispatch, type ReactNode, type RefObject, type SetStateAction, useDeferredValue, useRef, useState } from "react";
+import { FlatList, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   LoadingCard,
   MessageCard,
   PublicListingCard,
   ResponsiveColumns,
-  SectionCard,
   useListingColors,
 } from "@/features/listings/components";
 import { listingsApi } from "@/features/listings/api";
@@ -15,7 +16,8 @@ import { type ListingExploreFilters, type ListingExploreItem } from "@/features/
 import { usePublishedListings, useSavedListingIds } from "@/features/listings/hooks";
 import { parseOptionalNumber } from "@/features/listings/validation";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
-import { homieRadii } from "@/theme/homie";
+import { homieRadii, homieSpacing } from "@/theme/homie";
+import { homieBrandTitle, homieType } from "@/theme/typography";
 
 const DEFAULT_FILTERS: ListingExploreFilters = {
   searchText: "",
@@ -156,6 +158,253 @@ function matchesFilters(listing: ListingExploreItem, filters: ListingExploreFilt
   return matchesAvailability(listing, filters.availability, today);
 }
 
+type ExploreDiscoverHeaderProps = {
+  colors: ReturnType<typeof useListingColors>;
+  filters: ListingExploreFilters;
+  setFilters: Dispatch<SetStateAction<ListingExploreFilters>>;
+  searchInputRef: RefObject<TextInput | null>;
+  saveError: string | null;
+  savedListingsError: string | null;
+  areFiltersVisible: boolean;
+  setAreFiltersVisible: Dispatch<SetStateAction<boolean>>;
+  activeFilterCount: number;
+  minRentText: string;
+  setMinRentText: (value: string) => void;
+  maxRentText: string;
+  setMaxRentText: (value: string) => void;
+  clearFilters: () => void;
+  visibleCount: number;
+};
+
+function ExploreDiscoverHeader({
+  colors,
+  filters,
+  setFilters,
+  searchInputRef,
+  saveError,
+  savedListingsError,
+  areFiltersVisible,
+  setAreFiltersVisible,
+  activeFilterCount,
+  minRentText,
+  setMinRentText,
+  maxRentText,
+  setMaxRentText,
+  clearFilters,
+  visibleCount,
+}: ExploreDiscoverHeaderProps) {
+  const filtersPrimary = areFiltersVisible || activeFilterCount > 0;
+
+  return (
+    <View style={{ gap: homieSpacing.section, marginBottom: homieSpacing.section }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: homieSpacing.page,
+          paddingVertical: 12,
+        }}>
+        <Text style={[homieBrandTitle, { color: colors.accentPressed }]}>Homie</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Focus search"
+            onPress={() => searchInputRef.current?.focus()}
+            hitSlop={10}>
+            <Image source="sf:magnifyingglass" style={{ width: 24, height: 24, tintColor: colors.body }} />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Map view" hitSlop={10}>
+            <Image source="sf:map" style={{ width: 24, height: 24, tintColor: colors.accentPressed }} />
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={{ paddingHorizontal: homieSpacing.page, gap: homieSpacing.section }}>
+        <View style={{ position: "relative" }}>
+          <View
+            style={{
+              position: "absolute",
+              left: 18,
+              top: 0,
+              bottom: 0,
+              justifyContent: "center",
+              zIndex: 1,
+              pointerEvents: "none",
+            }}>
+            <Image source="sf:location.fill" style={{ width: 22, height: 22, tintColor: colors.body }} />
+          </View>
+          <TextInput
+            ref={searchInputRef}
+            value={filters.searchText}
+            onChangeText={(searchText) => setFilters((current) => ({ ...current, searchText }))}
+            placeholder="Where do you want to live?"
+            placeholderTextColor={`${colors.body}99`}
+            style={{
+              minHeight: 56,
+              paddingLeft: 54,
+              paddingRight: 18,
+              paddingVertical: 16,
+              borderRadius: homieRadii.control,
+              borderCurve: "continuous",
+              borderWidth: 0,
+              color: colors.title,
+              backgroundColor: colors.cardSecondary,
+              ...homieType.searchInput,
+              shadowColor: "#261817",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.06,
+              shadowRadius: 3,
+            }}
+          />
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 10, paddingVertical: 4 }}>
+          <Pressable
+            onPress={() => setAreFiltersVisible((current) => !current)}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              paddingHorizontal: 18,
+              paddingVertical: 11,
+              borderRadius: homieRadii.full,
+              borderCurve: "continuous",
+              backgroundColor: filtersPrimary ? colors.accent : colors.surfaceHigh,
+            }}>
+            <Image
+              source="sf:slider.horizontal.3"
+              style={{
+                width: 16,
+                height: 16,
+                tintColor: filtersPrimary ? colors.onAccent : colors.title,
+              }}
+            />
+            <Text
+              style={[
+                homieType.label,
+                { color: filtersPrimary ? colors.onAccent : colors.title, fontSize: 13 },
+              ]}>
+              Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setAreFiltersVisible(true)}
+            style={{
+              paddingHorizontal: 18,
+              paddingVertical: 11,
+              borderRadius: homieRadii.full,
+              borderCurve: "continuous",
+              backgroundColor: colors.surfaceHigh,
+            }}>
+            <Text style={[homieType.label, { color: colors.title, fontSize: 13 }]}>Price range</Text>
+          </Pressable>
+
+          {PROPERTY_TYPE_CHIPS.map((option) => {
+            const isSelected = (filters.propertyType ?? "all") === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => setFilters((current) => ({ ...current, propertyType: option.value }))}
+                style={{
+                  paddingHorizontal: 18,
+                  paddingVertical: 11,
+                  borderRadius: homieRadii.full,
+                  borderCurve: "continuous",
+                  backgroundColor: isSelected ? colors.accent : colors.surfaceHigh,
+                }}>
+                <Text
+                  style={[
+                    homieType.label,
+                    { color: isSelected ? colors.onAccent : colors.title, fontSize: 13 },
+                  ]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+
+          <Pressable
+            onPress={() => setAreFiltersVisible(true)}
+            style={{
+              paddingHorizontal: 18,
+              paddingVertical: 11,
+              borderRadius: homieRadii.full,
+              borderCurve: "continuous",
+              backgroundColor: colors.surfaceHigh,
+            }}>
+            <Text style={[homieType.label, { color: colors.title, fontSize: 13 }]}>Move-in</Text>
+          </Pressable>
+        </ScrollView>
+      </View>
+
+      {saveError || savedListingsError ? (
+        <View style={{ paddingHorizontal: homieSpacing.page }}>
+          <MessageCard
+            title="Saved listings unavailable"
+            description={saveError ?? savedListingsError ?? "We couldn't update saved listings."}
+            tone="danger"
+          />
+        </View>
+      ) : null}
+
+      {areFiltersVisible ? (
+        <View style={{ paddingHorizontal: homieSpacing.page, gap: homieSpacing.section }}>
+          <FilterChipGroup
+            label="Availability"
+            selectedValue={filters.availability}
+            options={AVAILABILITY_CHIPS}
+            onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
+          />
+
+          <ResponsiveColumns>
+            <RentInput
+              label="Min rent"
+              value={minRentText}
+              onChangeText={(value) => {
+                setMinRentText(value);
+                setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
+              }}
+            />
+            <RentInput
+              label="Max rent"
+              value={maxRentText}
+              onChangeText={(value) => {
+                setMaxRentText(value);
+                setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
+              }}
+            />
+          </ResponsiveColumns>
+
+          {activeFilterCount > 0 ? (
+            <Pressable onPress={clearFilters}>
+              <Text style={[homieType.caption, { fontWeight: "700", color: colors.accent }]}>Clear filters</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+
+      <View
+        style={{
+          marginHorizontal: homieSpacing.page,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+          paddingBottom: 14,
+          gap: 4,
+        }}>
+        <Text style={[homieType.headlineSection, { color: colors.title }]}>Available listings</Text>
+        <Text style={[homieType.caption, { color: colors.body }]}>
+          {visibleCount} propert{visibleCount === 1 ? "y" : "ies"} match your search
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 export default function ExploreScreen() {
   const { isConfigured } = useConvexConfiguration();
 
@@ -187,6 +436,7 @@ function ExploreListingsScreen() {
   const [areFiltersVisible, setAreFiltersVisible] = useState(false);
   const [pendingListingIds, setPendingListingIds] = useState<string[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const deferredSearchText = useDeferredValue(filters.searchText);
   const deferredFilters = useDeferredValue({
     ...filters,
@@ -245,203 +495,66 @@ function ExploreListingsScreen() {
   const showNoMatches = listings.length > 0 && visibleListings.length === 0 && activeFilters;
 
   return (
-    <FlatList
-      contentInsetAdjustmentBehavior="automatic"
-      style={{ flex: 1, backgroundColor: colors.background }}
-      data={visibleListings}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-          <PublicListingCard
-            listing={item}
-            isSaved={savedListingIdSet.has(item._id)}
-            isSavePending={pendingListingIds.includes(item._id)}
-            isSaveDisabled={!ownerKey}
-            onToggleSaved={() => handleToggleSaved(item._id, !savedListingIdSet.has(item._id))}
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
+      <FlatList
+        contentInsetAdjustmentBehavior="automatic"
+        style={{ flex: 1, backgroundColor: colors.background }}
+        data={visibleListings}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, paddingHorizontal: homieSpacing.page }}>
+            <PublicListingCard
+              listing={item}
+              isSaved={savedListingIdSet.has(item._id)}
+              isSavePending={pendingListingIds.includes(item._id)}
+              isSaveDisabled={!ownerKey}
+              onToggleSaved={() => handleToggleSaved(item._id, !savedListingIdSet.has(item._id))}
+            />
+          </View>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+        ListHeaderComponent={
+          <ExploreDiscoverHeader
+            colors={colors}
+            filters={filters}
+            setFilters={setFilters}
+            searchInputRef={searchInputRef}
+            saveError={saveError}
+            savedListingsError={savedListingsError}
+            areFiltersVisible={areFiltersVisible}
+            setAreFiltersVisible={setAreFiltersVisible}
+            activeFilterCount={activeFilterCount}
+            minRentText={minRentText}
+            setMinRentText={setMinRentText}
+            maxRentText={maxRentText}
+            setMaxRentText={setMaxRentText}
+            clearFilters={clearFilters}
+            visibleCount={visibleListings.length}
           />
-        </View>
-      )}
-      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-      ListHeaderComponent={
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16, marginBottom: 16 }}>
-          <SectionCard>
-            <View style={{ gap: 14 }}>
-              <Text
-                selectable
-                style={{
-                  fontSize: 15,
-                  lineHeight: 21,
-                  color: colors.body,
-                }}>
-                Browse the latest published listings and refine the feed with quick local filters.
-              </Text>
-              {saveError || savedListingsError ? (
-                <MessageCard
-                  title="Saved listings unavailable"
-                  description={saveError ?? savedListingsError ?? "We couldn't update saved listings."}
-                  tone="danger"
-                />
-              ) : null}
-
-              <View style={{ gap: 8 }}>
-                <Text
-                  selectable
-                  style={{
-                    fontSize: 15,
-                    lineHeight: 20,
-                    fontWeight: "700",
-                    color: colors.title,
-                  }}>
-                  Search
-                </Text>
-                <TextInput
-                  value={filters.searchText}
-                  onChangeText={(searchText) => setFilters((current) => ({ ...current, searchText }))}
-                  placeholder="Search title, summary, or location"
-                  placeholderTextColor={colors.body}
-                  style={{
-                    minHeight: 54,
-                    paddingHorizontal: 16,
-                    paddingVertical: 14,
-                    borderRadius: homieRadii.control,
-                    borderCurve: "continuous",
-                    borderWidth: 0,
-                    color: colors.title,
-                    backgroundColor: colors.cardSecondary,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                  />
-                </View>
-
-              <View style={{ gap: 10 }}>
-                <Pressable
-                  onPress={() => setAreFiltersVisible((current) => !current)}
-                  style={{
-                    minHeight: 48,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    paddingHorizontal: 14,
-                    paddingVertical: 12,
-                    borderRadius: homieRadii.control,
-                    borderCurve: "continuous",
-                    borderWidth: 0,
-                    backgroundColor: activeFilterCount > 0 ? colors.accentSoft : colors.cardSecondary,
-                  }}>
-                  <Text
-                    selectable
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 20,
-                      fontWeight: "700",
-                      color: colors.title,
-                    }}>
-                    {areFiltersVisible ? "Hide filters" : "Show filters"}
-                    {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-                  </Text>
-                  <Text
-                    selectable
-                    style={{
-                      fontSize: 13,
-                      lineHeight: 18,
-                      fontWeight: "700",
-                      color: activeFilterCount > 0 ? colors.accent : colors.body,
-                    }}>
-                    {activeFilterCount > 0 ? "Active" : "Optional"}
-                  </Text>
-                </Pressable>
-
-                {areFiltersVisible ? (
-                  <View style={{ gap: 14 }}>
-                    <FilterChipGroup
-                      label="Property type"
-                      selectedValue={filters.propertyType ?? "all"}
-                      options={PROPERTY_TYPE_CHIPS}
-                      onSelect={(propertyType) => setFilters((current) => ({ ...current, propertyType }))}
-                    />
-
-                    <ResponsiveColumns>
-                      <RentInput
-                        label="Min rent"
-                        value={minRentText}
-                        onChangeText={(value) => {
-                          setMinRentText(value);
-                          setFilters((current) => ({ ...current, minRent: parseOptionalNumber(value) }));
-                        }}
-                      />
-                      <RentInput
-                        label="Max rent"
-                        value={maxRentText}
-                        onChangeText={(value) => {
-                          setMaxRentText(value);
-                          setFilters((current) => ({ ...current, maxRent: parseOptionalNumber(value) }));
-                        }}
-                      />
-                    </ResponsiveColumns>
-
-                    <FilterChipGroup
-                      label="Availability"
-                      selectedValue={filters.availability}
-                      options={AVAILABILITY_CHIPS}
-                      onSelect={(availability) => setFilters((current) => ({ ...current, availability }))}
-                    />
-
-                    {activeFilterCount > 0 ? (
-                      <Pressable onPress={clearFilters}>
-                        <Text
-                          selectable
-                          style={{
-                            fontSize: 14,
-                            lineHeight: 18,
-                            fontWeight: "700",
-                            color: colors.accent,
-                          }}>
-                          Clear filters
-                        </Text>
-                      </Pressable>
-                    ) : null}
-                  </View>
-                ) : null}
-              </View>
-
-              <Text
-                selectable
-                style={{
-                  fontSize: 13,
-                  lineHeight: 18,
-                  fontWeight: "600",
-                  color: colors.body,
-                }}>
-                {visibleListings.length} listing{visibleListings.length === 1 ? "" : "s"}
-              </Text>
-            </View>
-          </SectionCard>
-        </View>
-      }
-      ListEmptyComponent={
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-          {showNoMatches ? (
-            <MessageCard
-              title="No listings match these filters."
-              description="Try widening the rent range, switching availability, or clearing the current filters."
-              actionLabel="Clear filters"
-              onActionPress={clearFilters}
-            />
-          ) : (
-            <MessageCard
-              title="No listings have been published yet."
-              description="Explore will fill in once the first published rental is live."
-            />
-          )}
-        </View>
-      }
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 40,
-      }}
-    />
+        }
+        ListEmptyComponent={
+          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, paddingHorizontal: homieSpacing.page }}>
+            {showNoMatches ? (
+              <MessageCard
+                title="No listings match these filters."
+                description="Try widening the rent range, switching availability, or clearing the current filters."
+                actionLabel="Clear filters"
+                onActionPress={clearFilters}
+              />
+            ) : (
+              <MessageCard
+                title="No listings have been published yet."
+                description="Explore will fill in once the first published rental is live."
+              />
+            )}
+          </View>
+        }
+        contentContainerStyle={{
+          paddingBottom: 120,
+          flexGrow: 1,
+        }}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -449,9 +562,11 @@ function ExploreScreenContainer({ children }: { children: ReactNode }) {
   const colors = useListingColors();
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 20 }}>
-      <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>{children}</View>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
+      <View style={{ flex: 1, paddingHorizontal: homieSpacing.page, paddingTop: homieSpacing.page }}>
+        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>{children}</View>
+      </View>
+    </SafeAreaView>
   );
 }
 

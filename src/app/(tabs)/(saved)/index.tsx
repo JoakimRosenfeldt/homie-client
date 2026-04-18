@@ -1,17 +1,14 @@
 import { useMutation } from "convex/react";
 import React from "react";
 import { FlatList, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  LoadingCard,
-  MessageCard,
-  PublicListingCard,
-  SectionCard,
-  useListingColors,
-} from "@/features/listings/components";
+import { LoadingCard, MessageCard, PublicListingCard, useListingColors } from "@/features/listings/components";
 import { listingsApi } from "@/features/listings/api";
 import { useSavedListings } from "@/features/listings/hooks";
 import { useConvexConfiguration } from "@/providers/convex-app-provider";
+import { homieSpacing } from "@/theme/homie";
+import { homieType } from "@/theme/typography";
 
 export default function SavedScreen() {
   const { isConfigured } = useConvexConfiguration();
@@ -78,54 +75,61 @@ function SavedListingsScreen() {
   }
 
   return (
-    <FlatList
-      contentInsetAdjustmentBehavior="automatic"
-      style={{ flex: 1, backgroundColor: colors.background }}
-      data={listings}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-          <PublicListingCard
-            listing={item}
-            isSaved
-            isSavePending={pendingListingIds.includes(item._id)}
-            isSaveDisabled={!ownerKey}
-            onToggleSaved={() => handleToggleSaved(item._id)}
-          />
-        </View>
-      )}
-      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-      ListHeaderComponent={
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16, marginBottom: 16 }}>
-          <SectionCard title="Saved listings" description="Keep your top picks close, compare them later, and drop the ones that no longer fit.">
-            <Text
-              selectable
-              style={{
-                fontSize: 15,
-                lineHeight: 21,
-                color: colors.body,
-              }}>
-              Saved listings stay tied to this device, so you can come back to them from the explore feed or any listing detail screen.
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
+      <FlatList
+        contentInsetAdjustmentBehavior="automatic"
+        style={{ flex: 1, backgroundColor: colors.background }}
+        data={listings}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, paddingHorizontal: homieSpacing.page }}>
+            <PublicListingCard
+              listing={item}
+              isSaved
+              isSavePending={pendingListingIds.includes(item._id)}
+              isSaveDisabled={!ownerKey}
+              onToggleSaved={() => handleToggleSaved(item._id)}
+            />
+          </View>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+        ListHeaderComponent={
+          <View
+            style={{
+              alignSelf: "center",
+              width: "100%",
+              maxWidth: 980,
+              paddingHorizontal: homieSpacing.page,
+              marginBottom: homieSpacing.section,
+              gap: 10,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.border,
+              paddingBottom: 16,
+            }}>
+            <Text style={[homieType.headlineSection, { color: colors.title }]}>Saved listings</Text>
+            <Text style={[homieType.bodySmall, { color: colors.body }]}>
+              Keep your top picks close. Listings stay on this device until you remove them.
             </Text>
-          </SectionCard>
-          {saveError ? <MessageCard title="Saved listings unavailable" description={saveError} tone="danger" /> : null}
-        </View>
-      }
-      ListEmptyComponent={
-        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>
-          <MessageCard
-            title="Nothing saved yet"
-            description="Tap Save on a listing card or detail screen to keep it here."
-            tone="default"
-          />
-        </View>
-      }
-      contentContainerStyle={{
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 32,
-      }}
-    />
+            {saveError ? (
+              <MessageCard title="Saved listings unavailable" description={saveError} tone="danger" />
+            ) : null}
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, paddingHorizontal: homieSpacing.page }}>
+            <MessageCard
+              title="Nothing saved yet"
+              description="Tap the heart on a listing card or detail screen to keep it here."
+              tone="default"
+            />
+          </View>
+        }
+        contentContainerStyle={{
+          paddingBottom: 120,
+          flexGrow: 1,
+        }}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -133,14 +137,15 @@ function SavedScreenContainer({ children }: React.PropsWithChildren) {
   const colors = useListingColors();
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-        paddingHorizontal: 20,
-        paddingTop: 20,
-      }}>
-      <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16 }}>{children}</View>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top"]}>
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: homieSpacing.page,
+          paddingTop: homieSpacing.page,
+        }}>
+        <View style={{ alignSelf: "center", width: "100%", maxWidth: 980, gap: 16 }}>{children}</View>
+      </View>
+    </SafeAreaView>
   );
 }

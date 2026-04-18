@@ -4,6 +4,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { useListingColors } from "@/features/listings/components";
 import { homieRadii, homieSpacing } from "@/theme/homie";
+import { homieFontFamily, homieType } from "@/theme/typography";
 
 const CREATE_CONTENT = {
   agent: {
@@ -66,22 +67,14 @@ export default function CreateSheet() {
           <Text
             selectable
             style={{
+              fontFamily: homieFontFamily.headlineExtraBold,
               fontSize: 28,
-              lineHeight: 32,
-              fontWeight: "700",
+              lineHeight: 34,
               color: colors.title,
             }}>
             {content.title}
           </Text>
-          <Text
-            selectable
-            style={{
-              fontSize: 16,
-              lineHeight: 22,
-              color: colors.body,
-            }}>
-            {content.description}
-          </Text>
+          <Text selectable style={[homieType.body, { fontSize: 16, color: colors.body }]}>{content.description}</Text>
         </View>
 
         <Pressable
@@ -101,13 +94,7 @@ export default function CreateSheet() {
             borderCurve: "continuous",
             backgroundColor: pressed ? colors.accentPressed : colors.accent,
           })}>
-          <Text
-            style={{
-              fontSize: 16,
-              lineHeight: 20,
-              fontWeight: "600",
-              color: colors.onAccent,
-            }}>
+          <Text style={[homieType.body, { fontSize: 16, fontFamily: homieFontFamily.bodySemiBold, color: colors.onAccent }]}>
             {kind === "listing" ? "Start listing" : "Continue"}
           </Text>
         </Pressable>

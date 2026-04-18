@@ -10,7 +10,6 @@ import {
   LoadingCard,
   MessageCard,
   SectionCard,
-  Tag,
   useListingColors,
 } from "@/features/listings/components";
 import { listingsApi } from "@/features/listings/api";

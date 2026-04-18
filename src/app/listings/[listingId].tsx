@@ -144,7 +144,7 @@ function ListingDetailScreen({
                   contentFit="cover"
                   style={{
                     width: "100%",
-                    aspectRatio: index === 0 ? 1.45 : 1.3,
+                    aspectRatio: index === 0 ? 16 / 9 : 1.3,
                     borderRadius: 22,
                   }}
                 />

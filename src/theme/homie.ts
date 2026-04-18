@@ -32,6 +32,8 @@ export type HomieColors = {
   background: string;
   card: string;
   cardSecondary: string;
+  /** Stitch `surface-container-high` — inactive filter pills. */
+  surfaceHigh: string;
   title: string;
   body: string;
   border: string;
@@ -55,6 +57,7 @@ export function getHomieColors(scheme: HomieScheme): HomieColors {
       background: "#FFF8F7",
       card: "#FFFFFF",
       cardSecondary: "#FFF0EF",
+      surfaceHigh: "#FDE2E0",
       title: "#261817",
       body: "#5A403F",
       border: "rgba(226, 190, 188, 0.35)",
@@ -77,6 +80,7 @@ export function getHomieColors(scheme: HomieScheme): HomieColors {
     background: "#261817",
     card: "#3D2C2C",
     cardSecondary: "#4A3A3A",
+    surfaceHigh: "#524545",
     title: "#FFEDEB",
     body: "#C9B5B3",
     border: "rgba(255, 237, 235, 0.14)",

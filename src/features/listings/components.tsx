@@ -7,12 +7,15 @@ import {
   type GestureResponderEvent,
   Pressable,
   ScrollView,
+  type StyleProp,
+  StyleSheet,
   Switch,
   Text,
   TextInput,
   useColorScheme,
   useWindowDimensions,
   View,
+  type ViewStyle,
 } from "react-native";
 
 import {
@@ -34,6 +37,7 @@ import {
 } from "@/features/listings/format";
 import { getListingDetailRoute } from "@/features/listings/navigation";
 import { getHomieColors, homieAmbientShadow, homieRadii, homieSpacing } from "@/theme/homie";
+import { homieFontFamily, homieType } from "@/theme/typography";
 
 export function useListingColors() {
   const isDark = useColorScheme() === "dark";
@@ -108,26 +112,11 @@ export function SectionCard({
       }}>
       {title ? (
         <View style={{ gap: 4 }}>
-          <Text
-            selectable
-            style={{
-              fontSize: 20,
-              lineHeight: 24,
-              fontWeight: "700",
-              color: colors.title,
-            }}>
+          <Text selectable style={[homieType.headlineSection, { fontSize: 20, lineHeight: 24, color: colors.title }]}>
             {title}
           </Text>
           {description ? (
-            <Text
-              selectable
-              style={{
-                fontSize: 14,
-                lineHeight: 20,
-                color: colors.body,
-              }}>
-              {description}
-            </Text>
+            <Text selectable style={[homieType.bodySmall, { color: colors.body }]}>{description}</Text>
           ) : null}
         </View>
       ) : null}
@@ -166,25 +155,8 @@ export function MessageCard({
         borderLeftWidth: 4,
         borderLeftColor: edgeColor,
       }}>
-      <Text
-        selectable
-        style={{
-          fontSize: 17,
-          lineHeight: 22,
-          fontWeight: "700",
-          color: colors.title,
-        }}>
-        {title}
-      </Text>
-      <Text
-        selectable
-        style={{
-          fontSize: 14,
-          lineHeight: 20,
-          color: colors.body,
-        }}>
-        {description}
-      </Text>
+      <Text selectable style={[homieType.headlineCard, { color: colors.title }]}>{title}</Text>
+      <Text selectable style={[homieType.bodySmall, { color: colors.body }]}>{description}</Text>
       {actionLabel && onActionPress ? (
         <Pressable onPress={onActionPress}>
           <Text
@@ -814,98 +786,105 @@ export function PublicListingCard({
   onToggleSaved?: () => void;
 }) {
   const colors = useListingColors();
+  const rentLabel =
+    typeof listing.monthlyRent === "number" ? `${formatCurrency(listing.monthlyRent, listing.currency)}/mo` : "Rent TBD";
 
   return (
     <Pressable
       onPress={() => router.push(getListingDetailRoute(listing._id) as never)}
-      style={{
-        backgroundColor: colors.card,
-        borderRadius: homieRadii.card,
-        borderCurve: "continuous",
-        padding: 16,
-        gap: 12,
-        borderWidth: 0,
-        boxShadow: colors.isDark ? homieAmbientShadow.dark : homieAmbientShadow.light,
-      }}>
+      style={{ gap: 14 }}>
       <View
         style={{
-          width: "100%",
-          aspectRatio: 1.55,
-          borderRadius: homieRadii.control,
+          borderRadius: homieRadii.card,
           borderCurve: "continuous",
           overflow: "hidden",
           backgroundColor: colors.cardSecondary,
+          boxShadow: colors.isDark ? homieAmbientShadow.dark : homieAmbientShadow.light,
         }}>
-        {listing.coverUrl ? <Image source={listing.coverUrl} contentFit="cover" style={{ flex: 1 }} /> : null}
+        <View style={{ width: "100%", aspectRatio: 16 / 9 }}>
+          {listing.coverUrl ? (
+            <Image source={listing.coverUrl} contentFit="cover" style={StyleSheet.absoluteFillObject} />
+          ) : (
+            <View style={[StyleSheet.absoluteFillObject, { backgroundColor: colors.cardSecondary }]} />
+          )}
+
+          {typeof listing.monthlyRent === "number" ? (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 16,
+                left: 16,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 10,
+                borderCurve: "continuous",
+                backgroundColor: colors.accent,
+              }}>
+              <Text
+                style={{
+                  fontFamily: homieFontFamily.bodyBold,
+                  fontSize: 14,
+                  lineHeight: 18,
+                  color: colors.onAccent,
+                }}>
+                {rentLabel}
+              </Text>
+            </View>
+          ) : null}
+
+          {onToggleSaved ? (
+            <View style={{ position: "absolute", top: 12, right: 12 }} pointerEvents="box-none">
+              <ListingSaveButton
+                variant="icon"
+                isSaved={isSaved}
+                isPending={isSavePending}
+                disabled={isSaveDisabled}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  onToggleSaved();
+                }}
+              />
+            </View>
+          ) : null}
+        </View>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
-        <View style={{ flex: 1, gap: 4 }}>
+      <View style={{ paddingHorizontal: 4, gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <Text
             selectable
             numberOfLines={2}
-            style={{
-              fontSize: 18,
-              lineHeight: 22,
-              fontWeight: "700",
-              color: colors.title,
-            }}>
+            style={[homieType.headlineCard, { flex: 1, color: colors.title }]}>
             {listing.title.trim() || "Untitled listing"}
           </Text>
-          <Text
-            selectable
-            numberOfLines={1}
-            style={{
-              fontSize: 14,
-              lineHeight: 20,
-              color: colors.body,
-            }}>
-            {formatCurrency(listing.monthlyRent, listing.currency)} · {listing.publicLocationLabel ?? "Location coming soon"}
+        </View>
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Image source="sf:location.fill" style={{ width: 16, height: 16, tintColor: colors.body }} />
+          <Text selectable numberOfLines={2} style={[homieType.bodySmall, { flex: 1, color: colors.body }]}>
+            {listing.publicLocationLabel ?? "Location coming soon"}
           </Text>
         </View>
-        {onToggleSaved ? (
-          <ListingSaveButton
-            isSaved={isSaved}
-            isPending={isSavePending}
-            disabled={isSaveDisabled}
-            onPress={(event) => {
-              event.stopPropagation();
-              onToggleSaved();
-            }}
-          />
+
+        {listing.summary?.trim() ? (
+          <Text selectable numberOfLines={2} style={[homieType.bodySmall, { color: colors.body }]}>
+            {listing.summary.trim()}
+          </Text>
+        ) : null}
+
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: homieSpacing.chip }}>
+          <Tag label={getPropertyTypeLabel(listing.propertyType)} />
+          <Tag label={getRentalArrangementLabel(listing.rentalArrangement)} />
+          <Tag label={getAvailabilityLabel(listing)} />
+          <Tag label={`${listing.photoCount} photo${listing.photoCount === 1 ? "" : "s"}`} />
+        </View>
+
+        {typeof listing.sizeSqm === "number" ? (
+          <Text selectable style={[homieType.caption, { color: colors.title }]}>
+            {formatSize(listing.sizeSqm)}
+          </Text>
         ) : null}
       </View>
-
-      <Text
-        selectable
-        numberOfLines={2}
-        style={{
-          fontSize: 14,
-          lineHeight: 20,
-          color: colors.body,
-        }}>
-        {listing.summary?.trim() || "No summary provided yet."}
-      </Text>
-
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <Tag label={getPropertyTypeLabel(listing.propertyType)} />
-        <Tag label={getRentalArrangementLabel(listing.rentalArrangement)} />
-        <Tag label={getAvailabilityLabel(listing)} />
-        <Tag label={`${listing.photoCount} photo${listing.photoCount === 1 ? "" : "s"}`} />
-      </View>
-
-      {typeof listing.sizeSqm === "number" ? (
-        <Text
-          selectable
-          style={{
-            fontSize: 13,
-            lineHeight: 18,
-            fontWeight: "600",
-            color: colors.title,
-          }}>
-          {formatSize(listing.sizeSqm)}
-        </Text>
-      ) : null}
     </Pressable>
   );
 }
@@ -915,38 +894,76 @@ export function ListingSaveButton({
   isPending = false,
   disabled = false,
   onPress,
+  variant = "pill",
+  style,
 }: {
   isSaved: boolean;
   isPending?: boolean;
   disabled?: boolean;
   onPress: (event: GestureResponderEvent) => void;
+  variant?: "pill" | "icon";
+  style?: StyleProp<ViewStyle>;
 }) {
   const colors = useListingColors();
+
+  if (variant === "icon") {
+    return (
+      <Pressable
+        disabled={isPending || disabled}
+        onPress={onPress}
+        hitSlop={12}
+        style={[
+          {
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            borderCurve: "continuous",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(255, 255, 255, 0.22)",
+            opacity: isPending || disabled ? 0.55 : 1,
+          },
+          style,
+        ]}>
+        {isPending ? (
+          <ActivityIndicator color={colors.onAccent} size="small" />
+        ) : (
+          <Image
+            source={isSaved ? "sf:heart.fill" : "sf:heart"}
+            style={{ width: 22, height: 22, tintColor: colors.onAccent }}
+          />
+        )}
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
       disabled={isPending || disabled}
       onPress={onPress}
-      style={{
-        minHeight: 40,
-        minWidth: 78,
-        alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 14,
-        borderRadius: homieRadii.full,
-        borderCurve: "continuous",
-        borderWidth: 0,
-        backgroundColor: isSaved ? colors.secondarySoft : colors.cardSecondary,
-        opacity: isPending || disabled ? 0.6 : 1,
-      }}>
+      style={[
+        {
+          minHeight: 40,
+          minWidth: 78,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 14,
+          borderRadius: homieRadii.full,
+          borderCurve: "continuous",
+          borderWidth: 0,
+          backgroundColor: isSaved ? colors.secondarySoft : colors.cardSecondary,
+          opacity: isPending || disabled ? 0.6 : 1,
+        },
+        style,
+      ]}>
       <Text
         selectable
-        style={{
-          fontSize: 13,
-          lineHeight: 16,
-          fontWeight: "700",
-          color: isSaved ? colors.secondary : colors.title,
-        }}>
+        style={[
+          homieType.label,
+          {
+            color: isSaved ? colors.secondary : colors.title,
+          },
+        ]}>
         {isPending ? "Saving..." : isSaved ? "Saved" : "Save"}
       </Text>
     </Pressable>
@@ -966,14 +983,7 @@ export function Tag({ label }: { label: string }) {
         backgroundColor: colors.secondarySoft,
         borderWidth: 0,
       }}>
-      <Text
-        selectable
-        style={{
-          fontSize: 12,
-          lineHeight: 14,
-          fontWeight: "700",
-          color: colors.secondary,
-        }}>
+      <Text selectable style={[homieType.label, { fontSize: 11, letterSpacing: 0.3, color: colors.secondary }]}>
         {label}
       </Text>
     </View>

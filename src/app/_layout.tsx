@@ -3,6 +3,7 @@ import { Stack } from "expo-router/stack";
 import { useColorScheme } from "react-native";
 
 import { ConvexAppProvider } from "@/providers/convex-app-provider";
+import { HomieFontsProvider } from "@/providers/homie-fonts-provider";
 import { getHomieColors } from "@/theme/homie";
 
 function homieNavigationTheme(colorScheme: "light" | "dark") {
@@ -29,22 +30,24 @@ export default function RootLayout() {
 
   return (
     <ConvexAppProvider>
-      <ThemeProvider value={navTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="listings" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="create-sheet"
-            options={{
-              title: "Create",
-              presentation: "formSheet",
-              sheetGrabberVisible: true,
-              sheetAllowedDetents: [0.44],
-              contentStyle: { backgroundColor: "transparent" },
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
+      <HomieFontsProvider>
+        <ThemeProvider value={navTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="listings" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="create-sheet"
+              options={{
+                title: "Create",
+                presentation: "formSheet",
+                sheetGrabberVisible: true,
+                sheetAllowedDetents: [0.44],
+                contentStyle: { backgroundColor: "transparent" },
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </HomieFontsProvider>
     </ConvexAppProvider>
   );
 }
