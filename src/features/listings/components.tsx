@@ -17,6 +17,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   LISTING_AMENITY_OPTIONS,
@@ -72,6 +73,7 @@ export function ListingScreen({
 }>) {
   const colors = useListingColors();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isWide = width >= 900;
 
   return (
@@ -86,7 +88,7 @@ export function ListingScreen({
           width: "100%",
           maxWidth: 980,
           paddingHorizontal: isWide ? 28 : 20,
-          paddingTop: 20,
+          paddingTop: insets.top + 20,
           paddingBottom: footer ? 124 : 40,
           gap: 16,
         }}>
