@@ -3,7 +3,10 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+  AccessibilityInfo,
   ActivityIndicator,
+  Animated,
+  Easing,
   type GestureResponderEvent,
   Pressable,
   ScrollView,
@@ -56,7 +59,17 @@ export function useListingColors() {
 export function ListingScreen({
   children,
   footer,
-}: React.PropsWithChildren<{ footer?: React.ReactNode }>) {
+  footerVisible = true,
+  onFooterExited,
+  onScroll,
+  scrollEventThrottle,
+}: React.PropsWithChildren<{
+  footer?: React.ReactNode;
+  footerVisible?: boolean;
+  onFooterExited?: () => void;
+  onScroll?: React.ComponentProps<typeof ScrollView>["onScroll"];
+  scrollEventThrottle?: number;
+}>) {
   const colors = useListingColors();
   const { width } = useWindowDimensions();
   const isWide = width >= 900;
@@ -65,6 +78,8 @@ export function ListingScreen({
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
+        onScroll={onScroll}
+        scrollEventThrottle={scrollEventThrottle}
         style={{ flex: 1 }}
         contentContainerStyle={{
           alignSelf: "center",
@@ -79,23 +94,81 @@ export function ListingScreen({
       </ScrollView>
 
       {footer ? (
-        <View
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            paddingHorizontal: isWide ? 28 : 20,
-            paddingTop: 12,
-            paddingBottom: 20,
-            backgroundColor: colors.background,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-          }}>
+        <ListingFooterBackground isVisible={footerVisible} isWide={isWide} onExited={onFooterExited}>
           <View style={{ alignSelf: "center", width: "100%", maxWidth: 980 }}>{footer}</View>
-        </View>
+        </ListingFooterBackground>
       ) : null}
     </View>
+  );
+}
+
+function ListingFooterBackground({
+  children,
+  isVisible,
+  isWide,
+  onExited,
+}: React.PropsWithChildren<{ isVisible: boolean; isWide: boolean; onExited?: () => void }>) {
+  const colors = useListingColors();
+  const progress = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    AccessibilityInfo.isReduceMotionEnabled().then((isReduceMotionEnabled) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (isReduceMotionEnabled) {
+        progress.setValue(isVisible ? 1 : 0);
+        if (!isVisible) {
+          onExited?.();
+        }
+        return;
+      }
+
+      Animated.timing(progress, {
+        toValue: isVisible ? 1 : 0,
+        duration: isVisible ? 320 : 220,
+        easing: Easing.bezier(0.22, 1, 0.36, 1),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished && isMounted && !isVisible) {
+          onExited?.();
+        }
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isVisible, onExited, progress]);
+
+  return (
+    <Animated.View
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: isWide ? 28 : 20,
+        paddingTop: 12,
+        paddingBottom: 20,
+        backgroundColor: colors.background,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+        opacity: progress,
+        transform: [
+          {
+            translateY: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [18, 0],
+            }),
+          },
+        ],
+      }}>
+      {children}
+    </Animated.View>
   );
 }
 
