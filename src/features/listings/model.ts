@@ -1,64 +1,21 @@
 export const DEFAULT_CURRENCY = "DKK";
 export const MAX_LISTING_PHOTOS = 12;
 
-export const PROPERTY_TYPE_OPTIONS = [
-  {
-    value: "house",
-    label: "House",
-    description: "A full home, villa, or townhouse rental.",
-  },
-  {
-    value: "apartment",
-    label: "Apartment",
-    description: "A flat or apartment in a shared or private building.",
-  },
-  {
-    value: "room",
-    label: "Room",
-    description: "A private room in a home or apartment.",
-  },
-] as const;
+type ListingStatus = "draft" | "published" | "archived";
+type PropertyType = "house" | "apartment" | "room";
+export type RentalArrangement = "standard" | "sublease";
+export type ListingAmenity =
+  | "parking"
+  | "laundry"
+  | "dishwasher"
+  | "balcony"
+  | "elevator"
+  | "internetIncluded"
+  | "petsAllowed"
+  | "smokingAllowed";
+export type ListingStepKey = "basics" | "details" | "features" | "location" | "photos" | "review";
 
-export const RENTAL_ARRANGEMENT_OPTIONS = [
-  {
-    value: "standard",
-    label: "Standard rental",
-    description: "A normal lease without a fixed move-out handoff.",
-  },
-  {
-    value: "sublease",
-    label: "Sublease",
-    description: "A temporary rental that needs a clear end date.",
-  },
-] as const;
-
-export const LISTING_AMENITY_OPTIONS = [
-  { value: "parking", label: "Parking" },
-  { value: "laundry", label: "Laundry" },
-  { value: "dishwasher", label: "Dishwasher" },
-  { value: "balcony", label: "Balcony" },
-  { value: "elevator", label: "Elevator" },
-  { value: "internetIncluded", label: "Internet included" },
-  { value: "petsAllowed", label: "Pets allowed" },
-  { value: "smokingAllowed", label: "Smoking allowed" },
-] as const;
-
-export const LISTING_STEP_META = [
-  { key: "basics", title: "Basics", shortTitle: "Basics" },
-  { key: "details", title: "Details", shortTitle: "Details" },
-  { key: "features", title: "Features", shortTitle: "Features" },
-  { key: "location", title: "Location", shortTitle: "Location" },
-  { key: "photos", title: "Photos", shortTitle: "Photos" },
-  { key: "review", title: "Review", shortTitle: "Review" },
-] as const;
-
-export type ListingStatus = "draft" | "published" | "archived";
-export type PropertyType = (typeof PROPERTY_TYPE_OPTIONS)[number]["value"];
-export type RentalArrangement = (typeof RENTAL_ARRANGEMENT_OPTIONS)[number]["value"];
-export type ListingAmenity = (typeof LISTING_AMENITY_OPTIONS)[number]["value"];
-export type ListingStepKey = (typeof LISTING_STEP_META)[number]["key"];
-
-export type ListingPhoto = {
+type ListingPhoto = {
   storageId: string;
   width?: number;
   height?: number;
@@ -197,14 +154,6 @@ export type SavedListingItem = ListingExploreItem & {
   savedAt: number;
 };
 
-export type ListingExploreFilters = {
-  searchText: string;
-  propertyType?: PropertyType | "all";
-  minRent?: number;
-  maxRent?: number;
-  availability: "any" | "availableNow" | "next30Days";
-};
-
 export type ListingBasicsInput = Partial<
   Pick<
   ListingBaseFields,
@@ -246,9 +195,3 @@ export type ListingLocationInput = Partial<
   | "publicLocationLabel"
   >
 >;
-
-export type ListingSectionPayload =
-  | ListingBasicsInput
-  | ListingDetailsInput
-  | ListingFeaturesInput
-  | ListingLocationInput;

@@ -10,16 +10,6 @@ export function normalizeText(value?: string | null) {
   return value?.trim() || undefined;
 }
 
-export function parseOptionalNumber(value: string) {
-  const normalized = value.trim().replace(",", ".");
-  if (!normalized) {
-    return undefined;
-  }
-
-  const parsed = Number(normalized);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
 export function buildPublicLocationLabel(input: {
   neighborhood?: string;
   city?: string;
@@ -35,7 +25,7 @@ export function buildPublicLocationLabel(input: {
   return normalizeText(input.countryCode);
 }
 
-export function isValidDateInput(value?: string) {
+function isValidDateInput(value?: string) {
   if (!value) {
     return false;
   }
@@ -53,7 +43,7 @@ function hasAddress(draft: Pick<ListingDraft, "addressLine1" | "postalCode" | "c
   );
 }
 
-export function getListingChecklist(
+function getListingChecklist(
   draft: Pick<
     ListingDraft,
     | "title"
@@ -137,7 +127,7 @@ export function getListingChecklist(
   ];
 }
 
-export function getCompletedSteps(
+function getCompletedSteps(
   listing: Pick<
     ListingDraft,
     | "title"
@@ -214,12 +204,6 @@ export function getCompletionState(
     checklist,
     canPublish: checklist.every((item) => item.complete),
   };
-}
-
-export function getFirstIncompleteStep(draft: Pick<ListingDraft, keyof ListingDraft>) {
-  const completion = getCompletionState(draft);
-  const incomplete = completion.checklist.find((item: ListingCompletionItem) => !item.complete);
-  return incomplete?.step ?? "review";
 }
 
 export function requiresAvailableTo(rentalArrangement?: RentalArrangement) {
