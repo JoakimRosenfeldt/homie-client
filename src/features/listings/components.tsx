@@ -177,7 +177,6 @@ export function MessageCard({
         borderColor: accent,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 17,
           lineHeight: 22,
@@ -187,7 +186,6 @@ export function MessageCard({
         {title}
       </Text>
       <Text
-        selectable
         style={{
           fontSize: 14,
           lineHeight: 20,
@@ -198,7 +196,6 @@ export function MessageCard({
       {actionLabel && onActionPress ? (
         <Pressable onPress={onActionPress}>
           <Text
-            selectable
             style={{
               fontSize: 14,
               lineHeight: 18,

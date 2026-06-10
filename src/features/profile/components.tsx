@@ -80,7 +80,6 @@ function ProfilePhotoSlide({
             paddingVertical: 7,
           }}>
           <Text
-            selectable
             style={{
               fontSize: 13,
               lineHeight: 17,
@@ -280,7 +279,7 @@ export function ProfilePhotoCarousel({
           alignItems: "center",
           justifyContent: "center",
         }}>
-        <Text selectable style={{ fontSize: 15, color: colors.body }}>
+        <Text style={{ fontSize: 15, color: colors.body }}>
           Add photos to stand out
         </Text>
       </View>
@@ -312,7 +311,6 @@ export function ProfilePhotoCarousel({
       <View style={{ gap: 4 }}>
         <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
           <Text
-            selectable
             style={{
               fontSize: 30,
               lineHeight: 36,
@@ -322,7 +320,6 @@ export function ProfilePhotoCarousel({
             {displayName}
           </Text>
           <Text
-            selectable
             style={{
               fontSize: 26,
               lineHeight: 32,
@@ -367,7 +364,6 @@ export function ProfileCompletionBanner({
       })}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <Text
-          selectable
           style={{
             fontSize: 15,
             lineHeight: 20,
@@ -377,7 +373,6 @@ export function ProfileCompletionBanner({
           Complete your profile
         </Text>
         <Text
-          selectable
           style={{
             fontSize: 15,
             lineHeight: 20,
@@ -407,7 +402,6 @@ export function ProfileCompletionBanner({
 
       {missingSteps.length > 0 ? (
         <Text
-          selectable
           style={{
             fontSize: 13,
             lineHeight: 18,
@@ -437,7 +431,6 @@ export function ProfileKeyFigure({ label, value }: { label: string; value: strin
         gap: 4,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 13,
           lineHeight: 17,
@@ -446,7 +439,6 @@ export function ProfileKeyFigure({ label, value }: { label: string; value: strin
         {label}
       </Text>
       <Text
-        selectable
         numberOfLines={2}
         style={{
           fontSize: 17,
@@ -475,7 +467,6 @@ export function ProfilePill({ label }: { label: string }) {
         paddingVertical: 8,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 13,
           lineHeight: 16,
@@ -503,7 +494,6 @@ export function ProfilePromptCard({ prompt }: { prompt: ProfilePrompt }) {
         gap: 10,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 14,
           lineHeight: 19,
@@ -513,7 +503,6 @@ export function ProfilePromptCard({ prompt }: { prompt: ProfilePrompt }) {
         {prompt.question}
       </Text>
       <Text
-        selectable
         style={{
           fontSize: 18,
           lineHeight: 26,
@@ -542,7 +531,7 @@ export function VerifiedBadge() {
         paddingHorizontal: 10,
         paddingVertical: 6,
       }}>
-      <Text selectable style={{ fontSize: 13, lineHeight: 16, fontWeight: "800", color: colors.accent }}>
+      <Text style={{ fontSize: 13, lineHeight: 16, fontWeight: "800", color: colors.accent }}>
         Verified tenant
       </Text>
     </View>
@@ -567,7 +556,6 @@ export function EditProfileButton({ onPress }: { onPress?: () => void }) {
         opacity: pressed ? 0.84 : 1,
       })}>
       <Text
-        selectable
         style={{
           fontSize: 17,
           lineHeight: 22,
@@ -600,7 +588,6 @@ export function PreviewProfileButton({ onPress }: { onPress?: () => void }) {
         opacity: pressed ? 0.84 : 1,
       })}>
       <Text
-        selectable
         style={{
           fontSize: 17,
           lineHeight: 22,

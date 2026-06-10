@@ -93,7 +93,6 @@ export default function ApartmentDetailScreen() {
       <View style={{ gap: 18 }}>
         <View style={{ gap: 8 }}>
           <Text
-            selectable
             style={{
               fontSize: isWide ? 38 : 30,
               lineHeight: isWide ? 44 : 35,
@@ -103,7 +102,6 @@ export default function ApartmentDetailScreen() {
             {apartment.title}
           </Text>
           <Text
-            selectable
             style={{
               fontSize: 16,
               lineHeight: 22,
@@ -133,7 +131,6 @@ export default function ApartmentDetailScreen() {
 
         <View style={{ gap: 8 }}>
           <Text
-            selectable
             style={{
               fontSize: 20,
               lineHeight: 25,
@@ -143,7 +140,6 @@ export default function ApartmentDetailScreen() {
             About this apartment
           </Text>
           <Text
-            selectable
             style={{
               fontSize: 15,
               lineHeight: 23,
@@ -155,7 +151,6 @@ export default function ApartmentDetailScreen() {
 
         <View style={{ gap: 10 }}>
           <Text
-            selectable
             style={{
               fontSize: 20,
               lineHeight: 25,
@@ -179,7 +174,6 @@ export default function ApartmentDetailScreen() {
             gap: 4,
           }}>
           <Text
-            selectable
             style={{
               fontSize: 14,
               lineHeight: 20,
@@ -188,7 +182,6 @@ export default function ApartmentDetailScreen() {
             Contact
           </Text>
           <Text
-            selectable
             style={{
               fontSize: 18,
               lineHeight: 24,
@@ -198,7 +191,6 @@ export default function ApartmentDetailScreen() {
             {apartment.contactName}
           </Text>
           <Text
-            selectable
             style={{
               fontSize: 14,
               lineHeight: 20,
@@ -277,7 +269,6 @@ function InterestedButton() {
         opacity: pressed ? 0.84 : 1,
       })}>
       <Text
-        selectable
         style={{
           fontSize: 17,
           lineHeight: 22,
@@ -310,7 +301,6 @@ function BackButton() {
         opacity: pressed ? 0.7 : 1,
       })}>
       <Text
-        selectable
         style={{
           fontSize: 15,
           lineHeight: 20,
@@ -340,7 +330,6 @@ function KeyFigure({ label, value }: { label: string; value: string }) {
         gap: 4,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 13,
           lineHeight: 17,
@@ -349,7 +338,6 @@ function KeyFigure({ label, value }: { label: string; value: string }) {
         {label}
       </Text>
       <Text
-        selectable
         numberOfLines={1}
         adjustsFontSizeToFit
         style={{
@@ -379,7 +367,6 @@ function InfoPill({ label }: { label: string }) {
         paddingVertical: 8,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 13,
           lineHeight: 16,

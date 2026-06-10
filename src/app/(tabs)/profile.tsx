@@ -24,7 +24,6 @@ export default function ProfileScreen() {
     <ListingScreen footer={<EditProfileButton />}>
       <View style={{ gap: 6, paddingTop: 8, paddingBottom: 4 }}>
         <Text
-          selectable
           style={{
             fontSize: 34,
             lineHeight: 39,
@@ -34,7 +33,6 @@ export default function ProfileScreen() {
           My profile
         </Text>
         <Text
-          selectable
           style={{
             fontSize: 16,
             lineHeight: 22,
@@ -52,7 +50,6 @@ export default function ProfileScreen() {
 
       <View style={{ gap: 8 }}>
         <Text
-          selectable
           style={{
             fontSize: 18,
             lineHeight: 24,
@@ -76,7 +73,6 @@ export default function ProfileScreen() {
 
       <View style={{ gap: 8 }}>
         <Text
-          selectable
           style={{
             fontSize: 20,
             lineHeight: 25,
@@ -86,7 +82,6 @@ export default function ProfileScreen() {
           About me
         </Text>
         <Text
-          selectable
           style={{
             fontSize: 15,
             lineHeight: 23,
@@ -95,7 +90,6 @@ export default function ProfileScreen() {
           {profile.bio}
         </Text>
         <Text
-          selectable
           style={{
             fontSize: 14,
             lineHeight: 20,
@@ -107,7 +101,6 @@ export default function ProfileScreen() {
 
       <View style={{ gap: 10 }}>
         <Text
-          selectable
           style={{
             fontSize: 20,
             lineHeight: 25,
@@ -126,7 +119,6 @@ export default function ProfileScreen() {
 
       <View style={{ gap: 12 }}>
         <Text
-          selectable
           style={{
             fontSize: 20,
             lineHeight: 25,

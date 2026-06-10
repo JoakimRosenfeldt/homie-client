@@ -4,7 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, userSelect: "none" }}>
       <Stack screenOptions={{ headerShown: false }} />
       <StatusBar style="auto" />
     </GestureHandlerRootView>

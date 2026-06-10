@@ -12,7 +12,6 @@ export default function HomeScreen() {
     <ListingScreen>
       <View style={{ gap: 6, paddingTop: 8, paddingBottom: 6 }}>
         <Text
-          selectable
           style={{
             fontSize: 34,
             lineHeight: 39,
@@ -22,7 +21,6 @@ export default function HomeScreen() {
           Apartments
         </Text>
         <Text
-          selectable
           style={{
             fontSize: 16,
             lineHeight: 22,
