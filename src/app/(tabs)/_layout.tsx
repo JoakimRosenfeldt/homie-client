@@ -1,5 +1,7 @@
 import { Tabs } from "expo-router";
-import { Text, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
+
+import { Text } from "@/components/text";
 
 function TabIcon({ label, focused }: { label: string; focused: boolean }) {
   return (

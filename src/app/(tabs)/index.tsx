@@ -1,5 +1,7 @@
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+
+import { Text } from "@/components/text";
 
 import { ApartmentCard } from "@/features/listings/apartment-card";
 import { ListingScreen, useListingColors } from "@/features/listings/components";

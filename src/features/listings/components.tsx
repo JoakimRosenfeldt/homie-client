@@ -4,13 +4,14 @@ import {
   Animated,
   Easing,
   Pressable,
-  Text,
   useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { Text } from "@/components/text";
 
 export function useListingColors() {
   const isDark = useColorScheme() === "dark";

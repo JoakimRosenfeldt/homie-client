@@ -1,20 +1,13 @@
 import { Image } from "expo-image";
 import React from "react";
-import {
-  FlatList,
-  type LayoutChangeEvent,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  Platform,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, View } from "react-native";
 import { Pressable as GesturePressable } from "react-native-gesture-handler";
-import PagerView from "react-native-pager-view";
 
+import { Text } from "@/components/text";
 import { useListingColors } from "@/features/listings/components";
 import type { ProfilePhoto, ProfilePrompt, UserProfile } from "@/features/profile/model";
+import { ProfilePhotoPager } from "@/features/profile/photo-pager";
+import type { ProfilePhotoPagerHandle } from "@/features/profile/photo-pager-types";
 
 function ProfilePhotoSlide({
   photo,
@@ -93,116 +86,6 @@ function ProfilePhotoSlide({
     </View>
   );
 }
-
-export type ProfilePhotoPagerHandle = {
-  goToPage: (index: number) => void;
-};
-
-const ProfilePhotoPager = React.forwardRef<
-  ProfilePhotoPagerHandle,
-  {
-    photos: UserProfile["photos"];
-    activeIndex: number;
-    onIndexChange: (index: number) => void;
-    onTapPrevious: () => void;
-    onTapNext: () => void;
-  }
->(function ProfilePhotoPager({ photos, activeIndex, onIndexChange, onTapPrevious, onTapNext }, ref) {
-  const pagerRef = React.useRef<PagerView>(null);
-  const listRef = React.useRef<FlatList<ProfilePhoto>>(null);
-  const [pageWidth, setPageWidth] = React.useState(0);
-
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const nextWidth = Math.round(event.nativeEvent.layout.width);
-
-    if (nextWidth > 0 && nextWidth !== pageWidth) {
-      setPageWidth(nextWidth);
-    }
-  };
-
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      goToPage: (index: number) => {
-        if (index < 0 || index >= photos.length) {
-          return;
-        }
-
-        if (Platform.OS === "web") {
-          listRef.current?.scrollToIndex({ index, animated: true });
-          onIndexChange(index);
-          return;
-        }
-
-        pagerRef.current?.setPage(index);
-      },
-    }),
-    [onIndexChange, photos.length],
-  );
-
-  const canGoPrevious = activeIndex > 0;
-  const canGoNext = activeIndex < photos.length - 1;
-
-  const slideProps = {
-    canGoPrevious,
-    canGoNext,
-    onTapPrevious,
-    onTapNext,
-  };
-
-  const pagerContent =
-    Platform.OS === "web" ? (
-      pageWidth > 0 ? (
-        <FlatList
-          ref={listRef}
-          data={photos}
-          horizontal
-          pagingEnabled
-          bounces={false}
-          decelerationRate="normal"
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(photo) => photo.id}
-          getItemLayout={(_, index) => ({
-            length: pageWidth,
-            offset: pageWidth * index,
-            index,
-          })}
-          onMomentumScrollEnd={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
-            const nextIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
-            onIndexChange(nextIndex);
-          }}
-          onScrollToIndexFailed={() => {
-            listRef.current?.scrollToOffset({ offset: 0, animated: false });
-          }}
-          renderItem={({ item }) => (
-            <View style={{ width: pageWidth, height: "100%" }}>
-              <ProfilePhotoSlide photo={item} {...slideProps} />
-            </View>
-          )}
-          style={{ flex: 1 }}
-        />
-      ) : null
-    ) : (
-      <PagerView
-        ref={pagerRef}
-        style={{ flex: 1 }}
-        initialPage={0}
-        overdrag={false}
-        onPageSelected={(event) => onIndexChange(event.nativeEvent.position)}>
-        {photos.map((photo) => (
-          <View key={photo.id} collapsable={false} style={{ flex: 1 }}>
-            <ProfilePhotoSlide photo={photo} {...slideProps} />
-          </View>
-        ))}
-      </PagerView>
-    );
-
-  return (
-    <View style={{ flex: 1 }} onLayout={handleLayout}>
-      {pagerContent}
-    </View>
-  );
-});
 
 function ProfilePhotoIndicators({
   photos,
@@ -300,10 +183,16 @@ export function ProfilePhotoCarousel({
         <ProfilePhotoPager
           ref={pagerRef}
           photos={photos}
-          activeIndex={activeIndex}
           onIndexChange={setActiveIndex}
-          onTapPrevious={goToPreviousPhoto}
-          onTapNext={goToNextPhoto}
+          renderSlide={(photo) => (
+            <ProfilePhotoSlide
+              photo={photo}
+              canGoPrevious={activeIndex > 0}
+              canGoNext={activeIndex < photos.length - 1}
+              onTapPrevious={goToPreviousPhoto}
+              onTapNext={goToNextPhoto}
+            />
+          )}
         />
         <ProfilePhotoIndicators photos={photos} activeIndex={activeIndex} />
       </View>

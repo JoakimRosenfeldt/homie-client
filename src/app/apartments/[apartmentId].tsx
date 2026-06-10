@@ -8,11 +8,11 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
-  Text,
   useWindowDimensions,
   View,
 } from "react-native";
 
+import { Text } from "@/components/text";
 import { ListingScreen, MessageCard, useListingColors } from "@/features/listings/components";
 import { formatCurrency, formatDate, formatRooms, formatSize } from "@/features/listings/format";
 import { getMockApartment } from "@/features/listings/mock-apartments";

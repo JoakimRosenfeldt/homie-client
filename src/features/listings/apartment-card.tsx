@@ -1,5 +1,7 @@
 import { Image } from "expo-image";
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
+
+import { Text } from "@/components/text";
 
 import { formatCurrency, formatDate, formatRooms, formatSize } from "@/features/listings/format";
 import { useListingColors } from "@/features/listings/components";
