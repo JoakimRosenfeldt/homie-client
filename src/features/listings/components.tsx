@@ -4,12 +4,12 @@ import {
   Animated,
   Easing,
   Pressable,
-  ScrollView,
   Text,
   useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function useListingColors() {
