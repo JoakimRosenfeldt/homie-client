@@ -4,13 +4,14 @@ import {
   Animated,
   Easing,
   Pressable,
-  ScrollView,
-  Text,
   useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { Text } from "@/components/text";
 
 export function useListingColors() {
   const isDark = useColorScheme() === "dark";
@@ -177,7 +178,6 @@ export function MessageCard({
         borderColor: accent,
       }}>
       <Text
-        selectable
         style={{
           fontSize: 17,
           lineHeight: 22,
@@ -187,7 +187,6 @@ export function MessageCard({
         {title}
       </Text>
       <Text
-        selectable
         style={{
           fontSize: 14,
           lineHeight: 20,
@@ -198,7 +197,6 @@ export function MessageCard({
       {actionLabel && onActionPress ? (
         <Pressable onPress={onActionPress}>
           <Text
-            selectable
             style={{
               fontSize: 14,
               lineHeight: 18,

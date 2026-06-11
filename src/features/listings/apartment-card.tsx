@@ -1,5 +1,7 @@
 import { Image } from "expo-image";
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Pressable, useWindowDimensions, View } from "react-native";
+
+import { Text } from "@/components/text";
 
 import { formatCurrency, formatDate, formatRooms, formatSize } from "@/features/listings/format";
 import { useListingColors } from "@/features/listings/components";
@@ -70,7 +72,6 @@ export function ApartmentCard({
         }}>
         <View style={{ gap: 4 }}>
           <Text
-            selectable
             numberOfLines={isWide ? 2 : 1}
             style={{
               fontSize: 16,
@@ -81,7 +82,6 @@ export function ApartmentCard({
             {apartment.title}
           </Text>
           <Text
-            selectable
             numberOfLines={1}
             style={{
               fontSize: 12,
@@ -95,7 +95,6 @@ export function ApartmentCard({
         <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
-              selectable
               numberOfLines={1}
               adjustsFontSizeToFit
               style={{
@@ -108,7 +107,6 @@ export function ApartmentCard({
             </Text>
             {isWide ? (
               <Text
-                selectable
                 style={{
                   fontSize: 12,
                   lineHeight: 16,
@@ -128,7 +126,6 @@ export function ApartmentCard({
               paddingVertical: isWide ? 7 : 6,
             }}>
             <Text
-              selectable
               style={{
                 fontSize: 11,
                 lineHeight: 14,
@@ -153,7 +150,6 @@ export function ApartmentCard({
 
         {isWide && apartment.highlights.length > 0 ? (
           <Text
-            selectable
             numberOfLines={2}
             style={{
               fontSize: isWide ? 12 : 14,
@@ -183,7 +179,6 @@ function InfoPill({ label, compact = false }: { label: string; compact?: boolean
         paddingVertical: compact ? 6 : 7,
       }}>
       <Text
-        selectable
         numberOfLines={1}
         style={{
           fontSize: compact ? 11 : 13,
