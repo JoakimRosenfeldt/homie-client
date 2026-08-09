@@ -32,6 +32,8 @@ export default function RootLayout() {
           <Stack.Screen name="rooms/[roomId]" />
           <Stack.Screen name="chat/[threadId]" />
           <Stack.Screen name="onboarding" />
+          <Stack.Screen name="search-agent" />
+          <Stack.Screen name="new-listing" />
         </Stack>
         <StatusBar style="auto" />
       </SessionProvider>

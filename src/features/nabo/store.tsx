@@ -2,7 +2,12 @@ import React from "react";
 
 import { APPLICANTS, type Applicant } from "@/features/applicants/data";
 import { INITIAL_MESSAGES, THREADS, type ChatMessage } from "@/features/matches/data";
-import { DEFAULT_PROFILE_TAGS, OWNER_PROFILE } from "@/features/profile/data";
+import {
+  DEFAULT_PROFILE_TAGS,
+  DEFAULT_SEARCH_AGENTS,
+  OWNER_PROFILE,
+  type SearchAgent,
+} from "@/features/profile/data";
 
 export const ROOM_TYPES = ["Room", "Studio", "Whole flat", "Shared room"];
 export const HOUSE_RULES = ["Non-smoking", "Pets ok", "Couple ok", "Female flatmates", "Furnished"];
@@ -37,6 +42,8 @@ type SessionState = {
   filters: Filters;
   profileTags: Record<string, boolean>;
   bio: string;
+  agents: SearchAgent[];
+  toast: string;
 };
 
 const INITIAL_STATE: SessionState = {
@@ -49,6 +56,8 @@ const INITIAL_STATE: SessionState = {
   filters: DEFAULT_FILTERS,
   profileTags: Object.fromEntries(DEFAULT_PROFILE_TAGS.map((tag) => [tag, true])),
   bio: OWNER_PROFILE.defaultBio,
+  agents: DEFAULT_SEARCH_AGENTS,
+  toast: "",
 };
 
 type SessionValue = SessionState & {
@@ -70,12 +79,32 @@ type SessionValue = SessionState & {
   resetFilters: () => void;
   toggleProfileTag: (value: string) => void;
   setBio: (value: string) => void;
+  addAgent: (agent: SearchAgent) => void;
+  publishListing: () => void;
 };
 
 const SessionContext = React.createContext<SessionValue | null>(null);
 
 export function SessionProvider({ children }: React.PropsWithChildren) {
   const [state, setState] = React.useState<SessionState>(INITIAL_STATE);
+  const toastTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => () => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+    }
+  }, []);
+
+  const flash = React.useCallback((message: string) => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+    }
+
+    setState((current) => ({ ...current, toast: message }));
+    toastTimer.current = setTimeout(() => {
+      setState((current) => ({ ...current, toast: "" }));
+    }, 3200);
+  }, []);
 
   const value = React.useMemo<SessionValue>(() => {
     const topApplicant = APPLICANTS[state.deckIndex % APPLICANTS.length];
@@ -154,8 +183,15 @@ export function SessionProvider({ children }: React.PropsWithChildren) {
         })),
 
       setBio: (bio) => setState((current) => ({ ...current, bio })),
+
+      addAgent: (agent) => {
+        setState((current) => ({ ...current, agents: [...current.agents, agent] }));
+        flash("Agent on. We will notify you the moment a match appears.");
+      },
+
+      publishListing: () => flash("Listing is live. Applicants will show up in your deck."),
     };
-  }, [state]);
+  }, [flash, state]);
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

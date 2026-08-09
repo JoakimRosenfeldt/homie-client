@@ -80,3 +80,32 @@ export function PencilIcon({ color, size = 14 }: IconProps) {
     </Svg>
   );
 }
+
+export function HomeIcon({ color, size = 19 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+      <Path
+        d="M2.5 9 10 3l7.5 6v8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1z"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function BellIcon({ color, size = 19 }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 20 20">
+      <Path
+        d="M10 2.5a5 5 0 0 1 5 5v3l1.6 2.6H3.4L5 10.5v-3a5 5 0 0 1 5-5z"
+        fill="none"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+      <Path d="M8 16a2 2 0 0 0 4 0" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}
