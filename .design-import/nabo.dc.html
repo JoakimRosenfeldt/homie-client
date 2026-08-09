@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>body{margin:0;background:#E1E8F0;font-family:Figtree,system-ui,sans-serif}a{color:#C2492E}a:hover{color:#A33A22}*::-webkit-scrollbar{width:0;height:0}</style></helmet>
+
+<div style="padding:56px 60px 80px;display:flex;flex-direction:column;gap:36px;align-items:flex-start">
+
+  <div style="max-width:760px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:baseline;gap:12px">
+      <span style="font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">Round 1 · interactive prototype</span>
+    </div>
+    <h1 style="margin:0;font:800 46px/1.05 Figtree,system-ui,sans-serif;color:#16202B;letter-spacing:-.01em">Nabo — find a room, and the people in it</h1>
+    <p style="margin:0;max-width:640px;font:400 15px/1.6 Figtree,sans-serif;color:#55636F;text-wrap:pretty">Two halves of one app. <strong style="font-weight:600;color:#16202B">Explore</strong> is a conventional, filter-heavy property search with a map — you are looking for a place. <strong style="font-weight:600;color:#16202B">Applicants</strong> is the flipped side — as the person renting out the room, you swipe through the profiles of people who applied, and chat with matches. The tab bar keeps the two modes clearly separated so it never reads as a dating app.</p>
+    <p style="margin:0;max-width:640px;font:400 13px/1.6 Figtree,sans-serif;color:#93A0AE;text-wrap:pretty">Direction: soft daylight — pale blue-grey ground, generous rounded cards, terracotta as the single accent, Figtree throughout. Assumptions: Copenhagen market, DKK, students + young professionals, owner-swipes-applicant model, map as a toggle from the list. Everything below is live — tap tabs, filters, listing cards, swipe or drag the applicant cards, open a match and send a message. Photos are labelled placeholders.</p>
+  </div>
+
+  <div style="display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span style="font:600 10px/1 ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">1a · live prototype</span>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+
+        <div style="height:100%;display:flex;flex-direction:column;background:#EDF1F6;position:relative;overflow:hidden;font-family:Figtree,system-ui,sans-serif">
+
+          <sc-if value="{{ showExplore }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;overflow:auto;padding:62px 0 0">
+              <div style="padding:8px 20px 4px;display:flex;align-items:flex-end;justify-content:space-between">
+                <h2 style="margin:0;font:800 32px/1.1 Figtree,system-ui,sans-serif;color:#16202B">Rooms in<br/>København</h2>
+                <button onClick="{{ toggleMap }}" style="border:1px solid rgba(22,32,43,.14);background:#fff;border-radius:999px;padding:9px 14px;font:600 12px Figtree,sans-serif;color:#16202B;cursor:pointer;display:flex;gap:7px;align-items:center" style-hover="background:#E5EBF2">
+                  <svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 0.5 11.5 6 6 11.5 0.5 6z" fill="#C2492E"></path></svg>Map
+                </button>
+              </div>
+              <div style="padding:16px 20px 10px;display:flex;gap:9px">
+                <div onClick="{{ openFilters }}" style="flex:1;height:44px;border-radius:16px;background:#fff;border:1px solid rgba(22,32,43,.10);display:flex;align-items:center;gap:9px;padding:0 14px;cursor:pointer">
+                  <svg width="13" height="13" viewBox="0 0 14 14"><circle cx="6" cy="6" r="4.6" fill="none" stroke="#93A0AE" stroke-width="1.5"></circle><path d="M9.6 9.6 13 13" stroke="#93A0AE" stroke-width="1.5" stroke-linecap="round"></path></svg>
+                  <span style="font:500 13.5px Figtree,sans-serif;color:#93A0AE">Nørrebro · 1 Sep · under 7.000</span>
+                </div>
+                <button onClick="{{ openFilters }}" style="width:44px;height:44px;border-radius:16px;background:#C2492E;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative">
+                  <svg width="15" height="15" viewBox="0 0 16 16"><path d="M1 4h14M4 8h8M6.5 12h3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"></path></svg>
+                  <span style="position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;border-radius:999px;background:#2F5D8C;color:#fff;font:700 10px/17px Figtree,sans-serif;text-align:center">3</span>
+                </button>
+              </div>
+              <div style="display:flex;gap:7px;padding:2px 20px 14px;overflow:auto">
+                <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4">
+                  <div style="flex:none;padding:7px 12px;border-radius:999px;background:#FBE8E2;border:1px solid rgba(194,73,46,.18);font:600 11.5px Figtree,sans-serif;color:#C2492E;white-space:nowrap">{{ c }}</div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;padding:0 20px 10px">
+                <span style="font:600 12px Figtree,sans-serif;color:#6B7785">{{ resultCount }} rooms</span>
+                <span style="font:600 12px Figtree,sans-serif;color:#C2492E">Newest first</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px;padding:0 20px 120px">
+                <sc-for list="{{ listings }}" as="l" hint-placeholder-count="3">
+                  <div onClick="{{ l.open }}" style="background:#fff;border-radius:24px;border:1px solid rgba(22,32,43,.08);overflow:hidden;cursor:pointer;box-shadow:0 1px 2px rgba(22,32,43,.04)">
+                    <div style="height:170px;position:relative;background:repeating-linear-gradient(135deg,#DCE4EE 0 10px,#E8EDF4 10px 20px);display:flex;align-items:center;justify-content:center">
+                      <span style="font:500 10px ui-monospace,Menlo,monospace;color:#93A0AE;letter-spacing:.06em">{{ l.photo }}</span>
+                      <div style="position:absolute;left:12px;bottom:12px;background:rgba(22,32,43,.82);color:#fff;border-radius:999px;padding:6px 11px;font:700 12px Figtree,sans-serif">{{ l.price }}</div>
+                      <div style="position:absolute;right:12px;top:12px;width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center">
+                        <svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 14S1.5 10 1.5 5.8A3.8 3.8 0 0 1 8 3.2a3.8 3.8 0 0 1 6.5 2.6C14.5 10 8 14 8 14z" fill="none" stroke="#16202B" stroke-width="1.4"></path></svg>
+                      </div>
+                    </div>
+                    <div style="padding:13px 15px 15px;display:flex;flex-direction:column;gap:7px">
+                      <div style="font:600 15.5px Figtree,sans-serif;color:#16202B">{{ l.title }}</div>
+                      <div style="font:500 12.5px Figtree,sans-serif;color:#6B7785">{{ l.meta }}</div>
+                      <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:3px">
+                        <sc-for list="{{ l.tags }}" as="t" hint-placeholder-count="2">
+                          <span style="padding:5px 9px;border-radius:7px;background:#EDF1F6;font:600 10.5px Figtree,sans-serif;color:#6B7785">{{ t }}</span>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showMap }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;position:relative;background:#DFE7F0;overflow:hidden">
+              <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 46px,rgba(22,32,43,.05) 46px 52px),linear-gradient(180deg,transparent 0 62px,rgba(22,32,43,.05) 62px 68px)"></div>
+              <div style="position:absolute;left:-40px;top:180px;width:250px;height:150px;border-radius:40% 60% 55% 45%;background:#D9E6DA"></div>
+              <div style="position:absolute;right:-70px;top:430px;width:300px;height:220px;background:#C9DDEF;border-radius:50% 40% 60% 45%"></div>
+              <div style="position:absolute;left:0;right:0;top:0;padding:62px 20px 12px;background:linear-gradient(#EDF1F6 70%,rgba(237,241,246,0))">
+                <div style="display:flex;gap:9px">
+                  <div onClick="{{ openFilters }}" style="flex:1;height:44px;border-radius:16px;background:#fff;border:1px solid rgba(22,32,43,.10);display:flex;align-items:center;padding:0 14px;font:500 13.5px Figtree,sans-serif;color:#93A0AE;cursor:pointer">Nørrebro · 1 Sep · under 7.000</div>
+                  <button onClick="{{ toggleMap }}" style="height:44px;padding:0 15px;border-radius:16px;background:#C2492E;border:none;color:#fff;font:600 12.5px Figtree,sans-serif;cursor:pointer">List</button>
+                </div>
+              </div>
+              <sc-for list="{{ pins }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.select }}" style="{{ p.style }}">{{ p.price }}</div>
+              </sc-for>
+              <div style="position:absolute;left:0;right:0;bottom:96px;padding:0 16px">
+                <div onClick="{{ openPinned }}" style="background:#fff;border-radius:22px;border:1px solid rgba(22,32,43,.08);box-shadow:0 8px 26px rgba(22,32,43,.14);padding:11px;display:flex;gap:12px;cursor:pointer">
+                  <div style="width:82px;height:82px;border-radius:14px;flex:none;background:repeating-linear-gradient(135deg,#DCE4EE 0 8px,#E8EDF4 8px 16px)"></div>
+                  <div style="display:flex;flex-direction:column;gap:5px;justify-content:center">
+                    <div style="font:600 14.5px Figtree,sans-serif;color:#16202B">{{ pinned.title }}</div>
+                    <div style="font:500 12px Figtree,sans-serif;color:#6B7785">{{ pinned.meta }}</div>
+                    <div style="font:700 14px Figtree,sans-serif;color:#C2492E">{{ pinned.price }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showSwipe }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;padding:62px 0 0;overflow:hidden">
+              <div style="padding:10px 20px 4px">
+                <div style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">Your listing · Jægersborggade 12</div>
+                <h2 style="margin:6px 0 0;font:800 30px/1.1 Figtree,system-ui,sans-serif;color:#16202B">{{ remaining }} people applied</h2>
+              </div>
+              <div style="flex:1;position:relative;margin:16px 16px 0">
+                <div style="position:absolute;left:14px;right:14px;top:14px;bottom:8px;border-radius:28px;background:#DDE4EC;border:1px solid rgba(22,32,43,.06)"></div>
+                <div style="position:absolute;left:7px;right:7px;top:7px;bottom:4px;border-radius:28px;background:#E6EBF2;border:1px solid rgba(22,32,43,.06)"></div>
+                <div onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" style="{{ cardStyle }}">
+                  <div style="height:56%;position:relative;background:repeating-linear-gradient(135deg,#DCE4EE 0 10px,#E8EDF4 10px 20px);display:flex;align-items:center;justify-content:center">
+                    <span style="font:500 10px ui-monospace,Menlo,monospace;color:#93A0AE">applicant photo</span>
+                    <div style="position:absolute;left:14px;top:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 10px;font:700 10.5px Figtree,sans-serif;color:#C2492E">{{ top.verified }}</div>
+                  </div>
+                  <div style="flex:1;padding:15px 18px 16px;display:flex;flex-direction:column;gap:9px">
+                    <div style="display:flex;align-items:baseline;gap:8px">
+                      <span style="font:800 26px Figtree,system-ui,sans-serif;color:#16202B">{{ top.name }}</span>
+                      <span style="font:600 15px Figtree,sans-serif;color:#6B7785">{{ top.age }}</span>
+                    </div>
+                    <div style="font:500 12.5px Figtree,sans-serif;color:#6B7785">{{ top.role }}</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      <sc-for list="{{ top.tags }}" as="t" hint-placeholder-count="3">
+                        <span style="padding:6px 10px;border-radius:999px;background:#FBE8E2;font:600 11px Figtree,sans-serif;color:#C2492E">{{ t }}</span>
+                      </sc-for>
+                    </div>
+                    <p style="margin:2px 0 0;font:400 13px/1.5 Figtree,sans-serif;color:#33404C;text-wrap:pretty">{{ top.bio }}</p>
+                    <div style="margin-top:auto;display:flex;gap:16px;border-top:1px solid rgba(22,32,43,.08);padding-top:11px">
+                      <div style="display:flex;flex-direction:column"><span style="font:600 10px Figtree,sans-serif;color:#93A0AE;letter-spacing:.06em">BUDGET</span><span style="font:700 13px Figtree,sans-serif;color:#16202B">{{ top.budget }}</span></div>
+                      <div style="display:flex;flex-direction:column"><span style="font:600 10px Figtree,sans-serif;color:#93A0AE;letter-spacing:.06em">MOVE-IN</span><span style="font:700 13px Figtree,sans-serif;color:#16202B">{{ top.movein }}</span></div>
+                      <div style="display:flex;flex-direction:column"><span style="font:600 10px Figtree,sans-serif;color:#93A0AE;letter-spacing:.06em">STAY</span><span style="font:700 13px Figtree,sans-serif;color:#16202B">{{ top.stay }}</span></div>
+                    </div>
+                  </div>
+                  <div style="{{ passStamp }}">PASS</div>
+                  <div style="{{ likeStamp }}">SHORTLIST</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:14px;justify-content:center;align-items:center;padding:16px 0 108px">
+                <button onClick="{{ pass }}" style="width:60px;height:60px;border-radius:999px;background:#fff;border:1px solid rgba(22,32,43,.12);cursor:pointer;font:700 22px Figtree,sans-serif;color:#6B7785" style-hover="background:#EDF1F6">✕</button>
+                <button onClick="{{ note }}" style="width:48px;height:48px;border-radius:999px;background:#fff;border:1px solid rgba(22,32,43,.12);cursor:pointer;font:600 12px Figtree,sans-serif;color:#6B7785">✎</button>
+                <button onClick="{{ like }}" style="width:60px;height:60px;border-radius:999px;background:#C2492E;border:none;cursor:pointer;color:#fff;font:400 24px Figtree,sans-serif" style-hover="background:#A33A22">♥</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showChats }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:62px 0 120px">
+              <h2 style="margin:10px 20px 4px;font:800 32px/1.1 Figtree,system-ui,sans-serif;color:#16202B">Matches</h2>
+              <p style="margin:0 20px 16px;font:500 12.5px Figtree,sans-serif;color:#93A0AE">You shortlisted them, they want the room.</p>
+              <div style="display:flex;gap:12px;padding:0 20px 18px;overflow:auto">
+                <sc-for list="{{ newMatches }}" as="m" hint-placeholder-count="3">
+                  <div onClick="{{ m.open }}" style="flex:none;width:74px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer">
+                    <div style="width:66px;height:66px;border-radius:999px;background:repeating-linear-gradient(135deg,#DCE4EE 0 7px,#E8EDF4 7px 14px);border:2px solid #C2492E"></div>
+                    <span style="font:600 11.5px Figtree,sans-serif;color:#16202B">{{ m.name }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="border-top:1px solid rgba(22,32,43,.08)">
+                <sc-for list="{{ threads }}" as="t" hint-placeholder-count="3">
+                  <div onClick="{{ t.open }}" style="display:flex;gap:13px;padding:14px 20px;border-bottom:1px solid rgba(22,32,43,.07);cursor:pointer;align-items:center" style-hover="background:#E5EBF2">
+                    <div style="width:52px;height:52px;border-radius:999px;flex:none;background:repeating-linear-gradient(135deg,#DCE4EE 0 7px,#E8EDF4 7px 14px)"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 14.5px Figtree,sans-serif;color:#16202B">{{ t.name }}</span><span style="font:500 11px Figtree,sans-serif;color:#93A0AE">{{ t.time }}</span></div>
+                      <span style="font:500 12.5px Figtree,sans-serif;color:#6B7785;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.last }}</span>
+                    </div>
+                    <div style="{{ t.dot }}"></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showProfile }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:62px 20px 120px">
+              <h2 style="margin:10px 0 16px;font:800 32px/1.1 Figtree,system-ui,sans-serif;color:#16202B">Your profile</h2>
+              <div style="background:#fff;border-radius:24px;border:1px solid rgba(22,32,43,.08);padding:18px;display:flex;gap:14px;align-items:center">
+                <div style="width:64px;height:64px;border-radius:999px;background:repeating-linear-gradient(135deg,#DCE4EE 0 7px,#E8EDF4 7px 14px)"></div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font:700 22px Figtree,system-ui,sans-serif;color:#16202B">Sofie Lund</span>
+                  <span style="font:500 12.5px Figtree,sans-serif;color:#6B7785">Renting out 1 room · Nørrebro</span>
+                </div>
+              </div>
+              <div onClick="{{ openOnboard }}" style="margin-top:16px;background:#FBE8E2;border-radius:24px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;cursor:pointer">
+                <span style="font:600 11px Figtree,sans-serif;color:#C2492E;letter-spacing:.08em">PROFILE STRENGTH · 80% · TAP TO EDIT</span>
+                <div style="height:6px;border-radius:99px;background:rgba(194,73,46,.2)"><div style="width:80%;height:6px;border-radius:99px;background:#C2492E"></div></div>
+                <span style="font:500 12px/1.5 Figtree,sans-serif;color:#C2492E">Add a photo of the shared kitchen — listings with 5+ photos get 3× more applicants.</span>
+              </div>
+              <div style="margin-top:16px;background:#fff;border-radius:24px;border:1px solid rgba(22,32,43,.08);overflow:hidden">
+                <sc-for list="{{ settings }}" as="s" hint-placeholder-count="4">
+                  <div style="padding:15px 18px;border-bottom:1px solid rgba(22,32,43,.06);display:flex;justify-content:space-between;align-items:center">
+                    <span style="font:600 13.5px Figtree,sans-serif;color:#16202B">{{ s.label }}</span>
+                    <span style="font:500 12.5px Figtree,sans-serif;color:#93A0AE">{{ s.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;background:#EDF1F6;z-index:40;display:flex;flex-direction:column">
+              <div style="flex:1;overflow:auto">
+                <div style="height:330px;position:relative;background:repeating-linear-gradient(135deg,#DCE4EE 0 12px,#E8EDF4 12px 24px);display:flex;align-items:center;justify-content:center">
+                  <span style="font:500 10px ui-monospace,Menlo,monospace;color:#93A0AE">{{ detail.photo }}</span>
+                  <button onClick="{{ closeDetail }}" style="position:absolute;left:16px;top:62px;width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,.94);border:none;cursor:pointer;font:400 17px Figtree,sans-serif;color:#16202B">‹</button>
+                  <div style="position:absolute;right:16px;bottom:14px;background:rgba(22,32,43,.8);color:#fff;border-radius:999px;padding:6px 11px;font:600 11px Figtree,sans-serif">1 / 8</div>
+                </div>
+                <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:10px">
+                  <h2 style="margin:0;font:800 27px/1.15 Figtree,system-ui,sans-serif;color:#16202B">{{ detail.title }}</h2>
+                  <div style="font:500 13px Figtree,sans-serif;color:#6B7785">{{ detail.meta }}</div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:2px">
+                    <sc-for list="{{ detail.tags }}" as="t" hint-placeholder-count="3">
+                      <span style="padding:7px 11px;border-radius:8px;background:#fff;border:1px solid rgba(22,32,43,.08);font:600 11px Figtree,sans-serif;color:#33404C">{{ t }}</span>
+                    </sc-for>
+                  </div>
+                  <p style="margin:8px 0 0;font:400 14px/1.65 Figtree,sans-serif;color:#33404C;text-wrap:pretty">{{ detail.blurb }}</p>
+                  <div style="margin-top:8px;background:#fff;border-radius:24px;border:1px solid rgba(22,32,43,.08);padding:16px 18px">
+                    <div style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">WHO YOU'D LIVE WITH</div>
+                    <div style="display:flex;gap:14px;margin-top:12px">
+                      <sc-for list="{{ detail.flatmates }}" as="f" hint-placeholder-count="2">
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:64px">
+                          <div style="width:52px;height:52px;border-radius:999px;background:repeating-linear-gradient(135deg,#DCE4EE 0 7px,#E8EDF4 7px 14px)"></div>
+                          <span style="font:600 11px Figtree,sans-serif;color:#16202B">{{ f.name }}</span>
+                          <span style="font:500 10px Figtree,sans-serif;color:#93A0AE;text-align:center">{{ f.role }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="height:150px;border-radius:24px;margin-top:4px;background:#DFE7F0;position:relative;overflow:hidden;border:1px solid rgba(22,32,43,.08)">
+                    <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 40px,rgba(22,32,43,.05) 40px 45px),linear-gradient(180deg,transparent 0 44px,rgba(22,32,43,.05) 44px 49px)"></div>
+                    <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:999px;background:#C2492E;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
+                  </div>
+                  <div style="height:110px"></div>
+                </div>
+              </div>
+              <div style="padding:14px 20px 30px;background:#fff;border-top:1px solid rgba(22,32,43,.08);display:flex;align-items:center;gap:14px">
+                <div style="display:flex;flex-direction:column"><span style="font:700 19px Figtree,sans-serif;color:#16202B">{{ detail.price }}</span><span style="font:500 11px Figtree,sans-serif;color:#93A0AE">incl. utilities</span></div>
+                <button onClick="{{ apply }}" style="flex:1;height:50px;border-radius:18px;background:#C2492E;border:none;color:#fff;font:700 14px Figtree,sans-serif;cursor:pointer" style-hover="background:#A33A22">{{ applyLabel }}</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showFilters }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;z-index:60;background:rgba(22,32,43,.35);display:flex;flex-direction:column;justify-content:flex-end">
+              <div style="background:#EDF1F6;border-radius:26px 26px 0 0;max-height:88%;display:flex;flex-direction:column">
+                <div style="padding:16px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(22,32,43,.08)">
+                  <button onClick="{{ closeFilters }}" style="background:none;border:none;font:600 13px Figtree,sans-serif;color:#93A0AE;cursor:pointer">Reset</button>
+                  <span style="font:600 15px Figtree,sans-serif;color:#16202B">Filters</span>
+                  <button onClick="{{ closeFilters }}" style="background:none;border:none;font:600 13px Figtree,sans-serif;color:#C2492E;cursor:pointer">Done</button>
+                </div>
+                <div style="overflow:auto;padding:18px 20px 24px;display:flex;flex-direction:column;gap:22px">
+                  <div style="display:flex;flex-direction:column;gap:11px">
+                    <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">MONTHLY RENT</span>
+                    <div style="display:flex;justify-content:space-between;font:700 15px Figtree,sans-serif;color:#16202B"><span>3.500 kr</span><span>{{ maxRentLabel }}</span></div>
+                    <input type="range" min="4000" max="12000" step="500" value="{{ maxRent }}" onChange="{{ setRent }}" style="width:100%;accent-color:#C2492E"/>
+                    <div style="display:flex;gap:3px;align-items:flex-end;height:34px">
+                      <sc-for list="{{ histogram }}" as="h" hint-placeholder-count="12">
+                        <div style="{{ h.style }}"></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:11px">
+                    <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">ROOM TYPE</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                      <sc-for list="{{ roomTypes }}" as="r" hint-placeholder-count="3">
+                        <div onClick="{{ r.toggle }}" style="{{ r.style }}">{{ r.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:11px">
+                    <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">FLATMATES &amp; HOUSE RULES</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
+                        <div onClick="{{ r.toggle }}" style="{{ r.style }}">{{ r.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:11px">
+                    <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">MOVE-IN</span>
+                    <div style="display:flex;gap:8px">
+                      <sc-for list="{{ dates }}" as="d" hint-placeholder-count="3">
+                        <div onClick="{{ d.toggle }}" style="{{ d.style }}">{{ d.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div onClick="{{ closeFilters }}" style="background:#16202B;border-radius:18px;height:52px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 14px Figtree,sans-serif;cursor:pointer">Show {{ resultCount }} rooms</div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#C2492E;font:600 12.5px Figtree,sans-serif">Save this search &amp; alert me</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showChat }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;z-index:70;background:#EDF1F6;display:flex;flex-direction:column">
+              <div style="padding:58px 16px 12px;display:flex;align-items:center;gap:11px;background:#fff;border-bottom:1px solid rgba(22,32,43,.08)">
+                <button onClick="{{ closeChat }}" style="background:none;border:none;font:400 20px Figtree,sans-serif;color:#16202B;cursor:pointer">‹</button>
+                <div style="width:38px;height:38px;border-radius:999px;background:repeating-linear-gradient(135deg,#DCE4EE 0 7px,#E8EDF4 7px 14px)"></div>
+                <div style="display:flex;flex-direction:column">
+                  <span style="font:600 14.5px Figtree,sans-serif;color:#16202B">{{ chat.name }}</span>
+                  <span style="font:500 11px Figtree,sans-serif;color:#C2492E">{{ chat.status }}</span>
+                </div>
+              </div>
+              <div style="flex:1;overflow:auto;padding:18px 16px;display:flex;flex-direction:column;gap:10px">
+                <div style="align-self:center;background:#FBE8E2;border-radius:999px;padding:7px 14px;font:600 11px Figtree,sans-serif;color:#C2492E;margin-bottom:6px">You matched on 4 Aug</div>
+                <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+                  <div style="{{ m.style }}">{{ m.text }}</div>
+                </sc-for>
+              </div>
+              <div style="padding:12px 16px 30px;background:#fff;border-top:1px solid rgba(22,32,43,.08);display:flex;gap:10px;align-items:center">
+                <input value="{{ draft }}" onChange="{{ setDraft }}" onKeyDown="{{ onKey }}" placeholder="Message" style="flex:1;height:44px;border-radius:999px;border:1px solid rgba(22,32,43,.12);background:#EDF1F6;padding:0 16px;font:500 13.5px Figtree,sans-serif;color:#16202B;outline:none"/>
+                <button onClick="{{ send }}" style="width:44px;height:44px;border-radius:999px;background:#C2492E;border:none;color:#fff;font:400 17px Figtree,sans-serif;cursor:pointer">↑</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showOnboard }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;z-index:80;background:#EDF1F6;display:flex;flex-direction:column">
+              <div style="padding:58px 20px 14px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <button onClick="{{ back }}" style="background:none;border:none;font:600 13px Figtree,sans-serif;color:#93A0AE;cursor:pointer">‹ Back</button>
+                  <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">STEP {{ stepNo }} OF 4</span>
+                  <button onClick="{{ closeOnboard }}" style="background:none;border:none;font:600 13px Figtree,sans-serif;color:#93A0AE;cursor:pointer">Close</button>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="4">
+                    <div style="{{ b.style }}"></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="flex:1;overflow:auto;padding:8px 20px 24px;display:flex;flex-direction:column;gap:16px">
+                <h2 style="margin:0;font:800 30px/1.15 Figtree,system-ui,sans-serif;color:#16202B;letter-spacing:-.01em">{{ stepTitle }}</h2>
+                <p style="margin:0;font:500 13.5px/1.55 Figtree,sans-serif;color:#6B7785;text-wrap:pretty">{{ stepHelp }}</p>
+
+                <sc-if value="{{ step1 }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                    <sc-for list="{{ photoSlots }}" as="p" hint-placeholder-count="6">
+                      <div style="{{ p.style }}">{{ p.label }}</div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ fields }}" as="f" hint-placeholder-count="3">
+                      <div style="background:#fff;border:1px solid rgba(22,32,43,.10);border-radius:22px;padding:12px 16px;display:flex;flex-direction:column;gap:3px">
+                        <span style="font:600 10.5px Figtree,sans-serif;color:#93A0AE;letter-spacing:.07em">{{ f.label }}</span>
+                        <span style="font:600 15px Figtree,sans-serif;color:#16202B">{{ f.value }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="background:#fff;border:1px solid rgba(22,32,43,.10);border-radius:22px;padding:12px 16px;display:flex;flex-direction:column;gap:6px">
+                      <span style="font:600 10.5px Figtree,sans-serif;color:#93A0AE;letter-spacing:.07em">ONE LINE ABOUT YOU</span>
+                      <textarea value="{{ bio }}" onChange="{{ setBio }}" rows="3" style="border:none;outline:none;resize:none;background:transparent;font:500 14px/1.5 Figtree,sans-serif;color:#16202B"></textarea>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:18px">
+                    <sc-for list="{{ tagGroups }}" as="g" hint-placeholder-count="3">
+                      <div style="display:flex;flex-direction:column;gap:10px">
+                        <span style="font:600 11px Figtree,sans-serif;color:#93A0AE;letter-spacing:.08em">{{ g.label }}</span>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                          <sc-for list="{{ g.items }}" as="t" hint-placeholder-count="4">
+                            <div onClick="{{ t.toggle }}" style="{{ t.style }}">{{ t.label }}</div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ step4 }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#fff;border-radius:28px;border:1px solid rgba(22,32,43,.08);box-shadow:0 10px 30px rgba(22,32,43,.08);overflow:hidden">
+                    <div style="height:190px;background:repeating-linear-gradient(135deg,#DCE4EE 0 10px,#E8EDF4 10px 20px);display:flex;align-items:center;justify-content:center;font:500 10px ui-monospace,Menlo,monospace;color:#93A0AE">your first photo</div>
+                    <div style="padding:15px 18px 18px;display:flex;flex-direction:column;gap:9px">
+                      <div style="display:flex;align-items:baseline;gap:8px"><span style="font:800 24px Figtree,system-ui,sans-serif;color:#16202B">Sofie</span><span style="font:600 15px Figtree,sans-serif;color:#6B7785">28</span></div>
+                      <div style="font:500 12.5px Figtree,sans-serif;color:#6B7785">Physiotherapist · Copenhagen</div>
+                      <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        <sc-for list="{{ pickedTags }}" as="t" hint-placeholder-count="3">
+                          <span style="padding:6px 10px;border-radius:999px;background:#FBE8E2;font:600 11px Figtree,sans-serif;color:#C2492E">{{ t }}</span>
+                        </sc-for>
+                      </div>
+                      <p style="margin:2px 0 0;font:400 13px/1.5 Figtree,sans-serif;color:#33404C">{{ bio }}</p>
+                    </div>
+                  </div>
+                  <p style="margin:0;font:500 12.5px/1.55 Figtree,sans-serif;color:#93A0AE">This is exactly what the person renting out the room sees when they swipe.</p>
+                </sc-if>
+              </div>
+              <div style="padding:12px 20px 30px;background:#fff;border-top:1px solid rgba(22,32,43,.08)">
+                <button onClick="{{ next }}" style="width:100%;height:52px;border-radius:18px;background:#C2492E;border:none;color:#fff;font:700 14.5px Figtree,sans-serif;cursor:pointer" style-hover="background:#A33A22">{{ nextLabel }}</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showMatchOverlay }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;inset:0;z-index:90;background:rgba(22,32,43,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 34px;text-align:center">
+              <div style="display:flex;align-items:center">
+                <div style="width:88px;height:88px;border-radius:999px;background:repeating-linear-gradient(135deg,#3B4A58 0 8px,#495866 8px 16px);border:3px solid #EDF1F6"></div>
+                <div style="width:88px;height:88px;border-radius:999px;background:repeating-linear-gradient(135deg,#3B4A58 0 8px,#495866 8px 16px);border:3px solid #EDF1F6;margin-left:-22px"></div>
+              </div>
+              <h3 style="margin:0;font:800 36px/1.1 Figtree,system-ui,sans-serif;color:#EDF1F6">It's a match</h3>
+              <p style="margin:0;font:500 14px/1.6 Figtree,sans-serif;color:rgba(237,241,246,.72)">{{ matchName }} also wants the room. Say hej before someone else does.</p>
+              <button onClick="{{ goChat }}" style="width:100%;height:52px;border-radius:18px;background:#EDF1F6;border:none;font:700 14px Figtree,sans-serif;color:#16202B;cursor:pointer">Send a message</button>
+              <button onClick="{{ dismissMatch }}" style="background:none;border:none;font:600 13px Figtree,sans-serif;color:rgba(237,241,246,.6);cursor:pointer">Keep swiping</button>
+            </div>
+          </sc-if>
+
+          <div style="position:absolute;left:0;right:0;bottom:0;z-index:30;padding:9px 14px 26px;background:rgba(237,241,246,.92);backdrop-filter:blur(14px);border-top:1px solid rgba(22,32,43,.08);display:grid;grid-template-columns:repeat(4,1fr)">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;position:relative">
+                <div style="{{ t.iconStyle }}"></div>
+                <span style="{{ t.labelStyle }}">{{ t.label }}</span>
+                <div style="{{ t.badge }}">{{ t.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+        </div>
+      </x-import>
+    </div>
+
+    <div style="max-width:330px;display:flex;flex-direction:column;gap:20px;padding-top:34px">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">How the two modes stay apart</span>
+        <p style="margin:0;font:400 13.5px/1.6 Figtree,sans-serif;color:#55636F;text-wrap:pretty">Explore and Map are cool, dense, property-first — image-led cards, hard numbers, no faces. Applicants is warm and single-focus — one person at a time, one big name, and language borrowed from hiring ("shortlist") rather than dating.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">Try</span>
+        <p style="margin:0;font:400 13.5px/1.6 Figtree,sans-serif;color:#55636F">Tap the terracotta filter button · open any listing and apply · drag an applicant card left or right · shortlist Amir to trigger a match · open a match and send a message · under You, tap the terracotta card to run the profile builder.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="font:600 10px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:#93A0AE">Open questions</span>
+        <p style="margin:0;font:400 13.5px/1.6 Figtree,sans-serif;color:#55636F;text-wrap:pretty">Should the seeker also swipe (mutual match), or only apply? Do existing flatmates get a vote on a shortlist? And is the applicant queue per-listing or per-household?</p>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:1100}}">
+const GREEN = '#C2492E';
+const LISTINGS = [
+  { id: 'l1', title: 'Bright room in a 4-person flat', meta: 'Nørrebro · 18 m² · own balcony', price: '5.400 kr', photo: 'room photo — window wall', tags: ['Furnished', 'Female flatmates', 'From 1 Sep'],
+    blurb: 'Corner room facing the courtyard, morning light until noon. We are three: a nurse, a PhD student and a chef, so the flat is quiet on weekdays and busy on Sundays. Shared kitchen was redone last year.',
+    flatmates: [{ name: 'Ida', role: 'Nurse, 29' }, { name: 'Mikkel', role: 'PhD, 27' }, { name: 'Yara', role: 'Chef, 31' }] },
+  { id: 'l2', title: 'Room in artist collective', meta: 'Vesterbro · 22 m² · shared studio', price: '4.900 kr', photo: 'room photo — desk corner', tags: ['Unfurnished', 'Pets ok', 'From 15 Aug'],
+    blurb: 'Old print workshop turned into five rooms and a shared studio. Loud on Thursdays, empty most weekends. Best for someone who makes things.',
+    flatmates: [{ name: 'Otto', role: 'Printer, 34' }, { name: 'Line', role: 'Dancer, 26' }] },
+  { id: 'l3', title: 'Quiet room near the lakes', meta: 'Østerbro · 15 m² · furnished', price: '6.200 kr', photo: 'room photo — bed and shelf', tags: ['Non-smoking', 'Couple ok', 'From 1 Oct'],
+    blurb: 'Top floor, two flatmates who both work early. Deposit three months. Bike parking in the yard.',
+    flatmates: [{ name: 'Sara', role: 'Vet, 33' }, { name: 'Tom', role: 'Baker, 30' }] },
+  { id: 'l4', title: 'Big room, garden access', meta: 'Amager · 24 m² · house share', price: '5.800 kr', photo: 'room photo — garden door', tags: ['Furnished', 'Garden', 'From 1 Sep'],
+    blurb: 'Ground floor of a 1930s house, five of us, one very old cat. Shared vegetable patch that nobody waters enough.',
+    flatmates: [{ name: 'Nina', role: 'Teacher, 38' }, { name: 'Ravi', role: 'Dev, 29' }] },
+];
+const APPLICANTS = [
+  { name: 'Amir', age: 26, role: 'Junior architect at Cobe', verified: 'ID + income verified', tags: ['Tidy', 'Cooks a lot', 'Non-smoker'], bio: 'Moving from Aarhus for work. I keep normal hours, cook most evenings and would happily take over the plant situation.', budget: '5.000–6.000', movein: '1 Sep', stay: '1+ year', match: true },
+  { name: 'Freja', age: 23, role: 'MSc student, KU', verified: 'Student verified', tags: ['Quiet', 'Home late', 'Has a cat'], bio: 'Third year of my masters, mostly at the library. I have a very calm cat called Sild who sleeps 20 hours a day.', budget: '4.500–5.500', movein: '15 Aug', stay: '2 years', match: false },
+  { name: 'Jonas', age: 29, role: 'Nurse, Rigshospitalet', verified: 'ID + income verified', tags: ['Shift work', 'Social', 'Non-smoker'], bio: 'Nights every other week, so the flat gets a quiet flatmate half the month. I am the one who fixes things.', budget: '5.500–6.500', movein: '1 Sep', stay: '1 year', match: true },
+  { name: 'Wei', age: 31, role: 'Product designer, freelance', verified: 'ID verified', tags: ['Works from home', 'Vegetarian', 'Tidy'], bio: 'Home three days a week with headphones on. Previous flatmates can vouch — happy to share references.', budget: '6.000–7.000', movein: '1 Oct', stay: '6 months+', match: false },
+];
+const THREADS = [
+  { id: 'm1', name: 'Amir', time: '12:04', last: 'Would Thursday 17:30 work for a viewing?', unread: true, status: 'Applied to Jægersborggade 12' },
+  { id: 'm2', name: 'Jonas', time: 'Yesterday', last: 'Sent you my references 👍', unread: false, status: 'Applied to Jægersborggade 12' },
+  { id: 'm3', name: 'Wei', time: 'Mon', last: 'Thanks! Let me know about the deposit.', unread: false, status: 'Applied to Jægersborggade 12' },
+];
+
+class Component extends DCLogic {
+  state = {
+    tab: 'explore', map: false, detail: null, filters: false, chat: null,
+    idx: 0, dx: 0, dragging: false, matchWith: null, applied: {},
+    maxRent: 7000, types: { Room: true }, rules: { 'Non-smoking': true }, date: '1 Sep',
+    msgs: { m1: [['them', 'Hi! I saw the room on Jægersborggade — is it still free from 1 September?'], ['me', 'It is! Three of us live here, all pretty quiet on weekdays.'], ['them', 'Sounds like a good fit. Would Thursday 17:30 work for a viewing?']],
+            m2: [['them', 'Sent you my references 👍']], m3: [['them', 'Thanks! Let me know about the deposit.']] },
+    draft: '',
+    onboard: false, step: 0, bio: 'Physio at Bispebjerg, out the door at seven, home by five. I cook too much food and will offer you some.',
+    onbTags: { Tidy: true, 'Cooks a lot': true, 'Non-smoker': true },
+  };
+
+  chip(on) {
+    return { padding: '9px 13px', borderRadius: 999, cursor: 'pointer', fontFamily: 'Figtree,sans-serif', fontWeight: 600, fontSize: 12,
+      background: on ? GREEN : '#fff', color: on ? '#fff' : '#33404C', border: '1px solid ' + (on ? GREEN : 'rgba(22,32,43,.12)') };
+  }
+
+  advance(liked) {
+    const a = APPLICANTS[this.state.idx % APPLICANTS.length];
+    this.setState({ idx: this.state.idx + 1, dx: 0, dragging: false, matchWith: liked && a.match ? a.name : null });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const top = APPLICANTS[s.idx % APPLICANTS.length];
+    const detail = s.detail ? LISTINGS.find(l => l.id === s.detail) : LISTINGS[0];
+    const thread = s.chat ? THREADS.find(t => t.id === s.chat) : THREADS[0];
+    const overlay = !!(s.detail || s.filters || s.chat || s.matchWith || s.onboard);
+    const rot = s.dx / 18;
+
+    const mk = (label, on, key, field) => ({ label, style: this.chip(on),
+      toggle: () => this.setState(st => field === 'date' ? { date: label } : { [field]: { ...st[field], [key]: !st[field][key] } }) });
+
+    return {
+      showExplore: s.tab === 'explore' && !s.map, showMap: s.tab === 'explore' && s.map,
+      showSwipe: s.tab === 'swipe', showChats: s.tab === 'matches', showProfile: s.tab === 'profile',
+      showDetail: !!s.detail, showFilters: s.filters, showChat: !!s.chat, showMatchOverlay: !!s.matchWith,
+      showOnboard: s.onboard, stepNo: s.step + 1, step1: s.step === 0, step2: s.step === 1, step3: s.step === 2, step4: s.step === 3,
+      stepTitle: ['Add a few photos', 'Who are you?', 'How do you live?', 'Here is your card'][s.step],
+      stepHelp: ['Rooms go to people who feel real. Three photos is the minimum — one of you, two of anything you love.',
+        'Kept short on purpose. The details that matter to a household are on the next step.',
+        'Pick what is true, not what sounds good. These are the first thing a household filters on.',
+        'Looks right? You can change any of it later from your profile.'][s.step],
+      stepBars: [0, 1, 2, 3].map(i => ({ style: { flex: 1, height: 4, borderRadius: 99, background: i <= s.step ? '#C2492E' : 'rgba(22,32,43,.12)' } })),
+      photoSlots: [0, 1, 2, 3, 4, 5].map(i => ({ label: i < 2 ? '' : i === 2 ? '+ add' : '',
+        style: { aspectRatio: '3 / 4', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          font: '600 12px Figtree,sans-serif', color: '#93A0AE',
+          background: i < 2 ? 'repeating-linear-gradient(135deg,#DCE4EE 0 8px,#E8EDF4 8px 16px)' : '#fff',
+          border: i < 2 ? 'none' : '1.5px dashed rgba(22,32,43,.18)' } })),
+      fields: [{ label: 'NAME', value: 'Sofie Lund' }, { label: 'AGE', value: '28' }, { label: 'OCCUPATION', value: 'Physiotherapist, Bispebjerg' }],
+      bio: s.bio, setBio: e => this.setState({ bio: e.target.value }),
+      tagGroups: [
+        { label: 'EVERYDAY', items: ['Tidy', 'Cooks a lot', 'Early riser', 'Home late', 'Works from home'] },
+        { label: 'HOUSEHOLD', items: ['Non-smoker', 'Has a pet', 'Vegetarian', 'No parties'] },
+        { label: 'SOCIAL', items: ['Shared dinners', 'Keep to myself', 'Guests sometimes'] },
+      ].map(g => ({ label: g.label, items: g.items.map(l => ({ label: l, style: this.chip(!!s.onbTags[l]),
+        toggle: () => this.setState(st => ({ onbTags: { ...st.onbTags, [l]: !st.onbTags[l] } })) })) })),
+      pickedTags: Object.keys(s.onbTags).filter(k => s.onbTags[k]).slice(0, 4),
+      nextLabel: s.step === 3 ? 'Publish my profile' : 'Continue',
+      next: () => s.step === 3 ? this.setState({ onboard: false, step: 0 }) : this.setState({ step: s.step + 1 }),
+      back: () => s.step === 0 ? this.setState({ onboard: false }) : this.setState({ step: s.step - 1 }),
+      openOnboard: () => this.setState({ onboard: true, step: 0 }),
+      closeOnboard: () => this.setState({ onboard: false, step: 0 }),
+      chips: ['Nørrebro', 'Vesterbro', 'Under 7.000 kr', 'From 1 Sep', 'Furnished'],
+      resultCount: 128,
+      listings: LISTINGS.map(l => ({ ...l, open: () => this.setState({ detail: l.id }) })),
+      detail, applyLabel: s.applied[detail.id] ? 'Application sent ✓' : 'Apply with your profile',
+      apply: () => this.setState(st => ({ applied: { ...st.applied, [detail.id]: true } })),
+      closeDetail: () => this.setState({ detail: null }),
+      toggleMap: () => this.setState({ map: !s.map }),
+      openFilters: () => this.setState({ filters: true }), closeFilters: () => this.setState({ filters: false }),
+      pins: LISTINGS.map((l, i) => ({ price: l.price.replace(' kr', ''), select: () => this.setState({ detail: l.id }),
+        style: { position: 'absolute', left: [70, 210, 130, 265][i], top: [300, 240, 470, 400][i], padding: '8px 12px', borderRadius: 999,
+          background: i === 0 ? '#16202B' : '#fff', color: i === 0 ? '#fff' : '#16202B', font: '700 12px Figtree,sans-serif',
+          boxShadow: '0 3px 10px rgba(22,32,43,.18)', cursor: 'pointer', whiteSpace: 'nowrap' } })),
+      pinned: LISTINGS[0], openPinned: () => this.setState({ detail: LISTINGS[0].id }),
+      remaining: APPLICANTS.length - (s.idx % APPLICANTS.length),
+      top,
+      cardStyle: { position: 'absolute', inset: 0, background: '#fff', borderRadius: 28, border: '1px solid rgba(22,32,43,.08)',
+        boxShadow: '0 10px 30px rgba(22,32,43,.10)', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        transform: `translateX(${s.dx}px) rotate(${rot}deg)`, transition: s.dragging ? 'none' : 'transform .28s cubic-bezier(.2,.8,.3,1)',
+        touchAction: 'none', cursor: 'grab', userSelect: 'none' },
+      passStamp: { position: 'absolute', top: 22, right: 20, padding: '7px 12px', border: '2px solid #2F5D8C', color: '#2F5D8C',
+        borderRadius: 8, font: '700 13px Figtree,sans-serif', letterSpacing: '.08em', transform: 'rotate(12deg)', opacity: Math.max(0, Math.min(1, -s.dx / 90)) },
+      likeStamp: { position: 'absolute', top: 22, left: 20, padding: '7px 12px', border: '2px solid ' + GREEN, color: GREEN,
+        borderRadius: 8, font: '700 13px Figtree,sans-serif', letterSpacing: '.08em', transform: 'rotate(-12deg)', opacity: Math.max(0, Math.min(1, s.dx / 90)) },
+      onDown: e => { e.currentTarget.setPointerCapture(e.pointerId); this.setState({ dragging: true, x0: e.clientX }); },
+      onMove: e => { if (s.dragging) this.setState({ dx: e.clientX - s.x0 }); },
+      onUp: () => { if (Math.abs(s.dx) > 90) { this.setState({ dx: s.dx > 0 ? 500 : -500, dragging: false }); setTimeout(() => this.advance(s.dx > 0), 200); } else this.setState({ dx: 0, dragging: false }); },
+      like: () => { this.setState({ dx: 500, dragging: false }); setTimeout(() => this.advance(true), 220); },
+      pass: () => { this.setState({ dx: -500, dragging: false }); setTimeout(() => this.advance(false), 220); },
+      note: () => {},
+      matchName: s.matchWith, dismissMatch: () => this.setState({ matchWith: null }),
+      goChat: () => { const t = THREADS.find(x => x.name === s.matchWith); this.setState({ matchWith: null, tab: 'matches', chat: t ? t.id : 'm1' }); },
+      newMatches: APPLICANTS.filter(a => a.match).map(a => ({ name: a.name, open: () => { const t = THREADS.find(x => x.name === a.name); this.setState({ chat: t ? t.id : 'm1' }); } })),
+      threads: THREADS.map(t => ({ ...t, open: () => this.setState({ chat: t.id }),
+        dot: { width: 8, height: 8, borderRadius: 999, background: t.unread ? GREEN : 'transparent', flex: 'none' } })),
+      chat: thread, closeChat: () => this.setState({ chat: null }),
+      messages: (s.msgs[thread.id] || []).map(([who, text]) => ({ text,
+        style: { alignSelf: who === 'me' ? 'flex-end' : 'flex-start', maxWidth: '78%', padding: '11px 14px', borderRadius: 18,
+          background: who === 'me' ? GREEN : '#fff', color: who === 'me' ? '#fff' : '#16202B',
+          border: who === 'me' ? 'none' : '1px solid rgba(22,32,43,.08)', font: '500 13.5px/1.45 Figtree,sans-serif' } })),
+      draft: s.draft, setDraft: e => this.setState({ draft: e.target.value }),
+      onKey: e => { if (e.key === 'Enter') this.sendMsg(); },
+      send: () => this.sendMsg(),
+      maxRent: s.maxRent, maxRentLabel: (s.maxRent / 1000).toFixed(1).replace('.', '.') + '00 kr',
+      setRent: e => this.setState({ maxRent: +e.target.value }),
+      histogram: [3, 6, 11, 18, 26, 34, 30, 22, 16, 11, 7, 4].map((h, i) => ({
+        style: { flex: 1, height: h, borderRadius: 2, background: 4000 + i * 700 <= s.maxRent ? GREEN : 'rgba(22,32,43,.14)' } })),
+      roomTypes: ['Room', 'Studio', 'Whole flat', 'Shared room'].map(l => mk(l, !!s.types[l], l, 'types')),
+      rules: ['Non-smoking', 'Pets ok', 'Couple ok', 'Female flatmates', 'Furnished'].map(l => mk(l, !!s.rules[l], l, 'rules')),
+      dates: ['Now', '1 Sep', '1 Oct'].map(l => mk(l, s.date === l, l, 'date')),
+      settings: [{ label: 'Your listing', value: 'Live · 12 applicants' }, { label: 'Deal breakers', value: 'Non-smoker, no pets' },
+        { label: 'Verification', value: 'ID + income ✓' }, { label: 'Saved searches', value: '2 · alerts on' }],
+      tabs: [['explore', 'Explore', 0], ['swipe', 'Applicants', 12], ['matches', 'Matches', 1], ['profile', 'You', 0]].map(([k, label, count]) => {
+        const on = s.tab === k && !overlay;
+        return { label, count, go: () => this.setState({ tab: k, map: false, detail: null, chat: null }),
+          iconStyle: k === 'explore' ? { width: 18, height: 18, border: '2px solid ' + (on ? GREEN : '#9BA8B5'), borderRadius: 4 }
+            : k === 'swipe' ? { width: 18, height: 18, border: '2px solid ' + (on ? GREEN : '#9BA8B5'), borderRadius: 4, transform: 'rotate(45deg)' }
+            : k === 'matches' ? { width: 18, height: 18, border: '2px solid ' + (on ? GREEN : '#9BA8B5'), borderRadius: '50%' }
+            : { width: 18, height: 18, background: on ? GREEN : '#9BA8B5', borderRadius: 3 },
+          labelStyle: { font: (on ? 700 : 500) + ' 10.5px Figtree,sans-serif', color: on ? GREEN : '#9BA8B5' },
+          badge: count ? { position: 'absolute', top: -4, right: 18, minWidth: 17, height: 17, borderRadius: 999, background: '#2F5D8C',
+            color: '#fff', font: '700 10px/17px Figtree,sans-serif', textAlign: 'center', padding: '0 4px' } : { display: 'none' } };
+      }),
+    };
+  }
+
+  sendMsg() {
+    const s = this.state; const id = s.chat || 'm1';
+    if (!s.draft.trim()) return;
+    this.setState({ msgs: { ...s.msgs, [id]: [...(s.msgs[id] || []), ['me', s.draft.trim()]] }, draft: '' });
+  }
+}
+</script>
+</body>
+</html>
