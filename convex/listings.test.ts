@@ -2,8 +2,10 @@ import type { GenericId as Id } from "convex/values";
 import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 
-import { listingsApi } from "../src/features/listings/api";
+import { api, internal } from "./_generated/api";
 import schema from "./schema";
+
+const listingsApi = api.listings;
 
 const convexModules = {
   "./_generated/api.js": () => import("./_generated/api.js"),
@@ -23,21 +25,19 @@ async function createValidDraft(t: ReturnType<typeof convexTest>, ownerKey: stri
   await t.mutation(listingsApi.saveSection, {
     listingId,
     ownerKey,
-    section: "basics",
-    payload: {
+    input: { section: "basics", payload: {
       title: "Sunny room near the lakes",
       summary: "Short walk to transit and parks.",
       description: "Bright rental with a calm courtyard and a separate work nook.",
       propertyType: "room",
       rentalArrangement,
-    },
+    } },
   });
 
   await t.mutation(listingsApi.saveSection, {
     listingId,
     ownerKey,
-    section: "details",
-    payload: {
+    input: { section: "details", payload: {
       monthlyRent: 8200,
       sizeSqm: 22,
       availableFrom: "2026-04-01",
@@ -45,29 +45,36 @@ async function createValidDraft(t: ReturnType<typeof convexTest>, ownerKey: stri
       currency: "DKK",
       minLeaseMonths: 1,
       maxLeaseMonths: 12,
-    },
+    } },
   });
 
   await t.mutation(listingsApi.saveSection, {
     listingId,
     ownerKey,
-    section: "location",
-    payload: {
+    input: { section: "location", payload: {
       addressLine1: "Example Street 10",
       postalCode: "2100",
       city: "Copenhagen",
       countryCode: "DK",
       neighborhood: "Osterbro",
-    },
+    } },
+  });
+  await t.mutation(internal.listings.applyGeocode, {
+    listingId,
+    ownerKeyHash: await sha256Hex(ownerKey),
+    addressFingerprint: "Example Street 10\u001f\u001f2100\u001fCopenhagen\u001fDK",
+    exactCoordinate: { latitude: 55.7, longitude: 12.5 },
   });
 
   const storageId = await t.run(async (ctx) =>
     ctx.storage.store(new Blob(["listing-photo"], { type: "image/jpeg" })),
   );
+  const uploadSessionId = await registerListingUpload(t, ownerKey, listingId, storageId);
 
   await t.mutation(listingsApi.attachPhoto, {
     listingId,
     ownerKey,
+    uploadSessionId,
     storageId,
     width: 1200,
     height: 900,
@@ -135,6 +142,24 @@ async function storePhoto(t: ReturnType<typeof convexTest>, label: string) {
   return t.run(async (ctx) => ctx.storage.store(new Blob([label], { type: "image/jpeg" })));
 }
 
+async function registerListingUpload(
+  t: ReturnType<typeof convexTest>,
+  ownerKey: string,
+  listingId: Id<"listings">,
+  storageId: Id<"_storage">,
+) {
+  const ownerKeyHash = await sha256Hex(ownerKey);
+  return t.run((ctx) => ctx.db.insert("fileUploads", {
+    ownerKeyHash,
+    purpose: "listingPhoto",
+    listingId,
+    storageId,
+    state: "attached",
+    createdAt: Date.now(),
+    attachedAt: Date.now(),
+  }));
+}
+
 describe("listings", () => {
   it("draft creation stores ownership correctly", async () => {
     const t = convexTest(schema, convexModules);
@@ -163,10 +188,9 @@ describe("listings", () => {
       t.mutation(listingsApi.saveSection, {
         listingId,
         ownerKey: "wrong-owner",
-        section: "basics",
-        payload: {
+        input: { section: "basics", payload: {
           title: "Should fail",
-        },
+        } },
       }),
     ).rejects.toThrow("different device");
   });
@@ -179,22 +203,20 @@ describe("listings", () => {
     await t.mutation(listingsApi.saveSection, {
       listingId,
       ownerKey,
-      section: "details",
-      payload: {
+      input: { section: "details", payload: {
         monthlyRent: 12500,
         sizeSqm: 55,
         availableFrom: "2026-04-01",
-      },
+      } },
     });
 
     await t.mutation(listingsApi.saveSection, {
       listingId,
       ownerKey,
-      section: "basics",
-      payload: {
+      input: { section: "basics", payload: {
         title: "Updated title",
         description: "Clean copy",
-      },
+      } },
     });
 
     const draft = await t.query(listingsApi.getDraft, { listingId, ownerKey });
@@ -219,42 +241,41 @@ describe("listings", () => {
     await t.mutation(listingsApi.saveSection, {
       listingId,
       ownerKey,
-      section: "basics",
-      payload: {
+      input: { section: "basics", payload: {
         title: "Sublease",
         description: "Temporary setup",
         propertyType: "apartment",
         rentalArrangement: "sublease",
-      },
+      } },
     });
 
     await t.mutation(listingsApi.saveSection, {
       listingId,
       ownerKey,
-      section: "details",
-      payload: {
+      input: { section: "details", payload: {
         monthlyRent: 16000,
         sizeSqm: 70,
         availableFrom: "2026-05-01",
-      },
+      } },
     });
 
     await t.mutation(listingsApi.saveSection, {
       listingId,
       ownerKey,
-      section: "location",
-      payload: {
+      input: { section: "location", payload: {
         addressLine1: "Sublease Street 5",
         postalCode: "2200",
         city: "Copenhagen",
         countryCode: "DK",
-      },
+      } },
     });
 
     const storageId = await t.run(async (ctx) => ctx.storage.store(new Blob(["sublease"], { type: "image/jpeg" })));
+    const uploadSessionId = await registerListingUpload(t, ownerKey, listingId, storageId);
     await t.mutation(listingsApi.attachPhoto, {
       listingId,
       ownerKey,
+      uploadSessionId,
       storageId,
       mimeType: "image/jpeg",
     });

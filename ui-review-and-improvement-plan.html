@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Homie UI review and closed beta plan</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f3f1ed;
+      --paper: #fffdf9;
+      --ink: #202b33;
+      --muted: #58636c;
+      --line: #d8d5cf;
+      --soft: #f2eee8;
+      --accent: #a63f28;
+      --accent-soft: #f8e7e0;
+      --blue: #35566f;
+      --blue-soft: #e8f0f5;
+      --green: #2f684a;
+      --green-soft: #e7f1eb;
+      --amber: #7a5212;
+      --amber-soft: #f8eed9;
+      --red: #8f2f2a;
+      --red-soft: #f9e7e5;
+      --shadow: 0 18px 45px rgb(32 43 51 / 8%);
+      --radius: 14px;
+      --max: 1080px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.62;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.16em;
+    }
+
+    a:hover {
+      color: var(--accent);
+    }
+
+    a:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+
+    .document {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 28px auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .masthead {
+      padding: clamp(28px, 6vw, 68px);
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgb(166 63 40 / 7%), transparent 46%),
+        var(--paper);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+      color: var(--ink);
+      line-height: 1.16;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin-bottom: 18px;
+      font-size: clamp(2.25rem, 7vw, 4.6rem);
+      letter-spacing: -0.045em;
+    }
+
+    h2 {
+      margin-bottom: 22px;
+      font-size: clamp(1.65rem, 4vw, 2.35rem);
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin-bottom: 9px;
+      font-size: 1.08rem;
+    }
+
+    p,
+    ul,
+    ol,
+    dl {
+      margin-top: 0;
+    }
+
+    .lede {
+      max-width: 760px;
+      margin-bottom: 26px;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2.5vw, 1.28rem);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .meta div {
+      display: flex;
+      gap: 7px;
+    }
+
+    .meta dt {
+      font-weight: 750;
+    }
+
+    .meta dd {
+      margin: 0;
+    }
+
+    .toc {
+      padding: 24px clamp(24px, 6vw, 68px);
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .toc strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.83rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .toc ol {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 22px;
+      margin-bottom: 0;
+      padding-left: 20px;
+    }
+
+    .toc li {
+      padding-right: 4px;
+    }
+
+    .toc a {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    section {
+      padding: clamp(36px, 7vw, 72px) clamp(24px, 6vw, 68px);
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 20px;
+    }
+
+    section:last-of-type {
+      border-bottom: 0;
+    }
+
+    .section-intro {
+      max-width: 770px;
+      margin-bottom: 28px;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .callout {
+      margin: 26px 0 0;
+      padding: 20px 22px;
+      border: 1px solid #d7b8ad;
+      border-left: 5px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--accent-soft);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .callout p:last-child {
+      margin-bottom: 0;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 30px 0 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .facts div {
+      min-width: 0;
+      padding: 18px;
+      border-right: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .facts div:last-child {
+      border-right: 0;
+    }
+
+    .facts dt {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .facts dd {
+      margin: 4px 0 0;
+      font-size: 1.06rem;
+      font-weight: 760;
+      line-height: 1.3;
+    }
+
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 16px;
+    }
+
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+    }
+
+    .panel > :last-child {
+      margin-bottom: 0;
+    }
+
+    .panel.good {
+      border-color: #bbd3c5;
+      background: var(--green-soft);
+    }
+
+    .panel.warning {
+      border-color: #dfcca4;
+      background: var(--amber-soft);
+    }
+
+    .panel.blue {
+      border-color: #bfd0dc;
+      background: var(--blue-soft);
+    }
+
+    .label {
+      display: inline-block;
+      margin-bottom: 9px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .label.p0 {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .label.p1 {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .label.p2 {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    ul,
+    ol {
+      padding-left: 1.25rem;
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    .plain-list {
+      margin-bottom: 0;
+    }
+
+    .table-wrap {
+      width: 100%;
+      margin: 22px 0 0;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+    }
+
+    th,
+    td {
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    td:first-child,
+    th:first-child {
+      width: 22%;
+      font-weight: 700;
+    }
+
+    .issue-list {
+      display: grid;
+      gap: 12px;
+      margin: 24px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .issue {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 14px;
+      padding: 17px 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    .issue-rank {
+      color: var(--accent);
+      font-size: 1.3rem;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
+
+    .issue p {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 22px;
+      margin: 28px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: flow;
+    }
+
+    .flow li {
+      position: relative;
+      min-height: 128px;
+      margin: 0;
+      padding: 42px 15px 15px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--soft);
+      counter-increment: flow;
+    }
+
+    .flow li::before {
+      content: counter(flow, decimal-leading-zero);
+      position: absolute;
+      top: 14px;
+      left: 15px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -17px;
+      width: 10px;
+      height: 10px;
+      border-top: 2px solid var(--muted);
+      border-right: 2px solid var(--muted);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .flow strong,
+    .flow span {
+      display: block;
+    }
+
+    .flow span {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+
+    .phase {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 22px;
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .phase:first-of-type {
+      margin-top: 26px;
+    }
+
+    .phase-number {
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .phase h3 {
+      font-size: 1.25rem;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.6fr);
+      gap: 24px;
+    }
+
+    .exit {
+      padding: 15px 16px;
+      border-left: 4px solid var(--green);
+      background: var(--green-soft);
+      color: var(--ink);
+    }
+
+    .exit strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    code {
+      padding: 0.1em 0.32em;
+      border-radius: 4px;
+      background: var(--soft);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+    }
+
+    summary {
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 720;
+    }
+
+    details > div {
+      padding: 0 16px 16px;
+      color: var(--muted);
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+      margin-bottom: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      position: relative;
+      margin: 0;
+      padding: 10px 12px 10px 38px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      width: 13px;
+      height: 13px;
+      border: 2px solid var(--green);
+      border-radius: 3px;
+    }
+
+    .sources {
+      color: var(--muted);
+      font-size: 0.91rem;
+    }
+
+    footer {
+      padding: 24px clamp(24px, 6vw, 68px);
+      border-top: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer p {
+      margin: 0;
+    }
+
+    @media (max-width: 820px) {
+      .facts,
+      .three-col,
+      .flow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .facts div:nth-child(2) {
+        border-right: 0;
+      }
+
+      .facts div:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .flow li:not(:last-child)::after {
+        display: none;
+      }
+
+      .phase-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .document {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .two-col,
+      .three-col,
+      .facts,
+      .flow,
+      .checklist {
+        grid-template-columns: 1fr;
+      }
+
+      .facts div,
+      .facts div:nth-child(2) {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .facts div:last-child {
+        border-bottom: 0;
+      }
+
+      .phase {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .issue {
+        grid-template-columns: 44px minmax(0, 1fr);
+      }
+
+      h1 {
+        font-size: 2.45rem;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --page: #11171b;
+        --paper: #182127;
+        --ink: #f1eee8;
+        --muted: #bec7cd;
+        --line: #3c484f;
+        --soft: #222d33;
+        --accent: #ff967a;
+        --accent-soft: #3c2924;
+        --blue: #9cc9e8;
+        --blue-soft: #23333e;
+        --green: #92d1ad;
+        --green-soft: #20372b;
+        --amber: #edc577;
+        --amber-soft: #3b3020;
+        --red: #ffaaa2;
+        --red-soft: #402725;
+        --shadow: 0 18px 45px rgb(0 0 0 / 25%);
+      }
+
+      .callout {
+        border-color: #70483d;
+      }
+
+      .panel.good {
+        border-color: #3c604d;
+      }
+
+      .panel.warning {
+        border-color: #675432;
+      }
+
+      .panel.blue {
+        border-color: #405b6c;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: white;
+        color: #111;
+        font-size: 10.5pt;
+      }
+
+      .document {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        box-shadow: none;
+      }
+
+      .masthead,
+      section {
+        padding: 28px 36px;
+      }
+
+      .toc {
+        display: none;
+      }
+
+      a {
+        color: #111;
+      }
+
+      .phase,
+      .panel,
+      .issue,
+      .table-wrap,
+      details {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <header class="masthead">
+      <p class="eyebrow">Product and interface plan</p>
+      <h1>Homie UI review and closed beta plan</h1>
+      <p class="lede">
+        A direct assessment of the current Expo app, the product decisions settled during review, and the smallest coherent path to a trustworthy rental beta for Denmark.
+      </p>
+      <dl class="meta">
+        <div><dt>Status</dt><dd>Implementation-ready</dd></div>
+        <div><dt>Reviewed</dt><dd>20 August 2026</dd></div>
+        <div><dt>Target</dt><dd>iOS and Android closed beta</dd></div>
+        <div><dt>Primary user</dt><dd>Room seeker</dd></div>
+      </dl>
+    </header>
+
+    <nav class="toc" aria-label="Document contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#readout">Executive readout</a></li>
+        <li><a href="#decisions">Product decisions</a></li>
+        <li><a href="#review">UI review</a></li>
+        <li><a href="#experience">Target experience</a></li>
+        <li><a href="#plan">Delivery plan</a></li>
+        <li><a href="#data">Data and backend</a></li>
+        <li><a href="#verification">Verification</a></li>
+      </ol>
+    </nav>
+
+    <section id="readout">
+      <p class="eyebrow">01 / Executive readout</p>
+      <h2>The concept is sound. The prototype is not yet a beta.</h2>
+      <p class="section-intro">
+        Homie already has a distinct visual voice, a clear rental context, and the beginnings of a useful two-sided product. The main risk is not visual polish. It is that the interface promises more than the product currently does. Several controls are inert, the renter and landlord journeys compete for the same navigation, and core trust, accessibility, and state handling are missing.
+      </p>
+
+      <div class="two-col">
+        <article class="panel good">
+          <span class="label">Keep</span>
+          <h3>The current identity</h3>
+          <p>The terracotta and cool blue-gray palette, Figtree typography, rental-specific copy, card language, and restrained warmth feel like Homie. Refine this system instead of replacing it.</p>
+        </article>
+        <article class="panel warning">
+          <span class="label">Change first</span>
+          <h3>The product contract</h3>
+          <p>Every visible control must work, every role must have a clear home, and every application must lead to a legible state. Until that is true, more surface area will deepen the prototype gap.</p>
+        </article>
+      </div>
+
+      <dl class="facts" aria-label="Review summary">
+        <div><dt>Prototype UI</dt><dd>About 6/10</dd></div>
+        <div><dt>Beta readiness</dt><dd>About 3/10</dd></div>
+        <div><dt>Current lint</dt><dd>Passes</dd></div>
+        <div><dt>Success metric</dt><dd>Applications that become shortlisted conversations</dd></div>
+      </dl>
+
+      <div class="callout">
+        <strong>Recommended beta boundary</strong>
+        <p>Ship a native-only closed beta with real browse, save, profile, application, shortlist, chat, listing, reporting, and deletion flows. Keep web as a contained demo surface. Do not add scraped third-party inventory.</p>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <p class="eyebrow">02 / Product decisions</p>
+      <h2>Locked decisions</h2>
+      <p class="section-intro">
+        These choices came out of the product grilling and remove the main ambiguities before implementation.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Area</th>
+              <th scope="col">Decision</th>
+              <th scope="col">Consequence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Audience</td>
+              <td>Room seekers are the primary user. Everyone can also create a native listing.</td>
+              <td>Seeker tasks define the main tabs. Host work lives under You.</td>
+            </tr>
+            <tr>
+              <td>Navigation</td>
+              <td>Explore, Applications, Inbox, You.</td>
+              <td>Remove Applicants and Matches as peer tabs. Add a separate host dashboard under You.</td>
+            </tr>
+            <tr>
+              <td>Inventory</td>
+              <td>Rooms, studios, apartments, and houses across Denmark.</td>
+              <td>Add <code>studio</code> to the backend listing type and branch relevant fields by rental type.</td>
+            </tr>
+            <tr>
+              <td>Language</td>
+              <td>English and Danish UI. Start from device locale and allow an override in You.</td>
+              <td>Use typed local dictionaries and <code>Intl</code>. Keep user-written listing text in its original language.</td>
+            </tr>
+            <tr>
+              <td>Identity</td>
+              <td>No account system for beta. Use a device-only secret stored with SecureStore.</td>
+              <td>No recovery or cross-device sync. State this clearly during onboarding and deletion.</td>
+            </tr>
+            <tr>
+              <td>Profile gate</td>
+              <td>Browsing is open. A profile is required before the first application.</td>
+              <td>Do not block exploration with onboarding. Trigger the smallest relevant profile flow at intent.</td>
+            </tr>
+            <tr>
+              <td>Application</td>
+              <td>Send an immutable profile snapshot plus an optional note.</td>
+              <td>Later profile edits must not change an application already reviewed by a landlord.</td>
+            </tr>
+            <tr>
+              <td>Conversation</td>
+              <td>Chat opens only after a landlord shortlists an application.</td>
+              <td>Applications need explicit statuses and server-enforced transitions.</td>
+            </tr>
+            <tr>
+              <td>Publishing</td>
+              <td>Valid native listings publish immediately.</td>
+              <td>Trust comes from rate limits, reporting, blocking, and takedown instead of manual pre-approval.</td>
+            </tr>
+            <tr>
+              <td>Location</td>
+              <td>Manual city or area first. Ask for device location only after the user chooses Near me.</td>
+              <td>Remove the launch-time permission prompt and avoid needless third-party reverse geocoding.</td>
+            </tr>
+            <tr>
+              <td>Map privacy</td>
+              <td>Keep exact coordinates private. Show a deterministic public coordinate displaced by about 250 meters.</td>
+              <td>Public pins remain stable without exposing an exact home address.</td>
+            </tr>
+            <tr>
+              <td>Retention</td>
+              <td>Applications and chats remain until the device owner deletes their data.</td>
+              <td>Add an explicit Delete my data flow and server-side cascade behavior.</td>
+            </tr>
+            <tr>
+              <td>Metric</td>
+              <td>Submitted applications that become shortlisted conversations.</td>
+              <td>Instrument event timestamps in first-party data. Skip a third-party analytics SDK for beta.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <strong>External inventory is out of scope</strong>
+        <p>Do not scrape BoligPortal or Lejebolig. Their published terms restrict unauthorized crawling and reuse. Native inventory is slower to seed, but it avoids legal, reliability, and duplicate-listing debt. See <a href="https://www.boligportal.dk/privatlivspolitik">BoligPortal's policy</a> and <a href="https://www.lejebolig.dk/vilkaar">Lejebolig's terms</a>.</p>
+      </div>
+    </section>
+
+    <section id="review">
+      <p class="eyebrow">03 / UI review</p>
+      <h2>What works and what blocks release</h2>
+      <p class="section-intro">
+        The live app was reviewed at 390 × 844 and 1280 × 800 across Explore, Applicants, Matches, You, onboarding, search agent, new listing, room detail, and chat. Source structure and current accessibility behavior were also inspected. The app does not read as generic AI output. Its voice is specific. The repeated rounded cards, pills, and striped placeholders are the main prototype tells.
+      </p>
+
+      <div class="three-col">
+        <article class="panel good">
+          <h3>Visual system</h3>
+          <p>Centralized light and dark tokens, consistent spacing, readable mobile hierarchy, and a recognizable color relationship provide a solid base.</p>
+        </article>
+        <article class="panel good">
+          <h3>Product voice</h3>
+          <p>Copy is concrete to Danish rentals. The interface feels warmer and more purposeful than a generic marketplace template.</p>
+        </article>
+        <article class="panel good">
+          <h3>Motion restraint</h3>
+          <p>The swipe flow respects reduced motion during commit. That same restraint should guide future micro-interactions.</p>
+        </article>
+      </div>
+
+      <ol class="issue-list" aria-label="Ranked UI issues">
+        <li class="issue">
+          <div><span class="label p0">P0</span><div class="issue-rank">01</div></div>
+          <div><h3>Visible controls do not complete actions</h3><p>Photo slots, listing inputs, private note, save-search text, sort, profile settings, and the room-card heart either do nothing or suggest a different action. Remove each promise until it works, or connect it to persistent state.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p0">P0</span><div class="issue-rank">02</div></div>
+          <div><h3>Renter and landlord jobs share one tab bar</h3><p>Explore, Applicants, Matches, and You mix roles and make the product model hard to learn. The settled navigation gives renters a stable home and moves host work into its own dashboard.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p0">P0</span><div class="issue-rank">03</div></div>
+          <div><h3>Contrast fails in both themes</h3><p>Examples include faint light text at about 2.66:1, muted light text at about 4.02:1, inactive tabs at about 2.14:1, and white text on the dark accent at about 3.3:1. Token changes can fix this systemically.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p0">P0</span><div class="issue-rank">04</div></div>
+          <div><h3>Keyboard and screen-reader contracts are incomplete</h3><p>Modals lack dialog semantics and focus containment. Selected chips do not expose state. The slider lacks value attributes, focus, and keyboard support. The web build has no visible focus ring.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p0">P0</span><div class="issue-rank">05</div></div>
+          <div><h3>Tap targets are too small</h3><p>Several controls are below the 44 × 44 point baseline, including Map, filter chips, back controls, New agent, and onboarding close controls. Increase the hit area even when the visible icon stays small.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p1">P1</span><div class="issue-rank">06</div></div>
+          <div><h3>Desktop web stretches mobile layouts</h3><p>Cards expand to about 1240 pixels and tab items to about 250 pixels. Use a centered content shell and treat web as a demo surface, not as a stretched phone.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p1">P1</span><div class="issue-rank">07</div></div>
+          <div><h3>The app asks for location too early</h3><p>An automatic permission prompt on launch spends trust before the user asks for a nearby search. Start with manual area selection and make Near me the explicit trigger.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p1">P1</span><div class="issue-rank">08</div></div>
+          <div><h3>The map is a visual placeholder</h3><p>The current map cannot support search, privacy, or movement behavior. Replace it with a native map that uses approximate public pins and bounded viewport queries.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p1">P1</span><div class="issue-rank">09</div></div>
+          <div><h3>System states are absent</h3><p>Real loading, empty, error, offline, permission-denied, success, and destructive confirmation states are required before live data replaces mocks.</p></div>
+        </li>
+        <li class="issue">
+          <div><span class="label p2">P2</span><div class="issue-rank">10</div></div>
+          <div><h3>Small text and semantics need a full pass</h3><p>Some labels sit at 10 to 12 points. There is no consistent heading or landmark model and no clear image alternative-text model. Verify at 200% text size and with VoiceOver and TalkBack.</p></div>
+        </li>
+      </ol>
+
+      <details>
+        <summary>Implementation evidence from the current code</summary>
+        <div>
+          <ul>
+            <li>Design tokens are centralized in <code>src/theme/tokens.ts</code>, so contrast repairs can be made at the system level.</li>
+            <li>The custom slider in <code>src/components/slider.tsx</code> needs a native and web-accessible replacement.</li>
+            <li>Filters, listing creation, and match flows contain modal behavior that needs one shared accessibility contract.</li>
+            <li>The client still reads from the in-app store in <code>src/features/nabo/store.tsx</code>. Convex is not yet wired into the browse flow.</li>
+            <li>The Convex schema already contains listings and saved listings, with ownership and private-address redaction behavior covered by tests.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section id="experience">
+      <p class="eyebrow">04 / Target experience</p>
+      <h2>One clear seeker journey, with host tools one level down</h2>
+      <p class="section-intro">
+        The core journey should be easy to explain in one sentence: browse freely, create the right profile when you apply, then move into a conversation only after the landlord shortlists you.
+      </p>
+
+      <ol class="flow" aria-label="Primary seeker flow">
+        <li><strong>Explore</strong><span>Browse list or map, filter, sort, and save.</span></li>
+        <li><strong>Profile gate</strong><span>Complete a shared-home or private-rental profile.</span></li>
+        <li><strong>Apply</strong><span>Review snapshot, add an optional note, submit once.</span></li>
+        <li><strong>Application</strong><span>Track pending, shortlisted, declined, withdrawn, or closed.</span></li>
+        <li><strong>Inbox</strong><span>Chat becomes available after shortlist.</span></li>
+      </ol>
+
+      <div class="two-col" style="margin-top: 28px;">
+        <article class="panel blue">
+          <h3>Shared-home profile</h3>
+          <ul class="plain-list">
+            <li>Name and photos</li>
+            <li>Short introduction</li>
+            <li>Occupation or study</li>
+            <li>Move-in date and expected stay</li>
+            <li>Budget</li>
+            <li>Household habits</li>
+          </ul>
+        </article>
+        <article class="panel blue">
+          <h3>Private-rental profile</h3>
+          <ul class="plain-list">
+            <li>Household size</li>
+            <li>Employment or study</li>
+            <li>Optional income range marked as unverified</li>
+            <li>Move-in date</li>
+            <li>Optional note</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Tab</th>
+              <th scope="col">Purpose</th>
+              <th scope="col">Primary content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Explore</td><td>Find and save homes.</td><td>Browse and Saved segments, filters, sort, list, map, saved-search alerts.</td></tr>
+            <tr><td>Applications</td><td>Track submitted interest.</td><td>Status, property summary, submitted snapshot, withdraw action, route to chat after shortlist.</td></tr>
+            <tr><td>Inbox</td><td>Continue shortlisted conversations.</td><td>Conversation list, unread state, message thread, report and block.</td></tr>
+            <tr><td>You</td><td>Manage identity, preferences, and hosting.</td><td>Profile, language, notifications, host dashboard, create listing, privacy, delete data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <strong>Host review keeps the swipe deck</strong>
+        <p>Keep the existing interaction as a secondary review mode. Add visible Pass and Shortlist buttons, open the full applicant profile on tap, and provide one-step undo. No essential decision can depend on a gesture alone.</p>
+      </div>
+    </section>
+
+    <section id="plan">
+      <p class="eyebrow">05 / Delivery plan</p>
+      <h2>Build vertical slices in dependency order</h2>
+      <p class="section-intro">
+        Each phase should leave the app more truthful than before. Keep mocks only where they are clearly marked and do not expose future controls ahead of their behavior.
+      </p>
+
+      <article class="phase">
+        <div class="phase-number">Phase 1</div>
+        <div>
+          <h3>Foundation, navigation, and interface contracts</h3>
+          <div class="phase-grid">
+            <div>
+              <ul>
+                <li>Replace the tab model with Explore, Applications, Inbox, and You.</li>
+                <li>Fix light and dark color tokens to meet WCAG AA for essential text and controls.</li>
+                <li>Set a 44 × 44 point minimum hit area and add visible keyboard focus.</li>
+                <li>Add semantic headings, navigation landmarks, labelled images, and selectable long-form text on web.</li>
+                <li>Create one accessible modal contract: dialog role, labelled title, focus containment, hidden background, Escape behavior on web, and focus restoration.</li>
+                <li>Expose pressed, checked, or selected state for chips based on their role.</li>
+                <li>Replace the custom PanResponder slider with accessible native and web controls.</li>
+                <li>Add typed English and Danish dictionaries, device-locale default, manual override, and <code>Intl</code> formatting.</li>
+                <li>Add explicit loading, empty, error, offline, denied, success, and destructive-confirmation patterns.</li>
+                <li>Constrain web content to a centered shell and hide unsupported native-only map behavior.</li>
+              </ul>
+            </div>
+            <div class="exit">
+              <strong>Exit condition</strong>
+              All visible controls work or are removed. Core screens are keyboard reachable on web, understandable with screen readers, and usable at 200% text size.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-number">Phase 2</div>
+        <div>
+          <h3>Real Explore, detail, saves, and map</h3>
+          <div class="phase-grid">
+            <div>
+              <ul>
+                <li>Connect the Expo client to Convex and replace mock listing reads.</li>
+                <li>Render the list with <code>FlatList</code> and stable keys.</li>
+                <li>Implement real filters, sort, result counts, save actions, and Browse or Saved segments.</li>
+                <li>Use the existing public/private listing boundary so exact address data never reaches public queries.</li>
+                <li>Add <code>react-native-maps</code> for iOS and Android. Keep web list-only for beta.</li>
+                <li>Store an exact private coordinate and a stable public coordinate displaced by about 250 meters.</li>
+                <li>Refresh after <code>onRegionChangeComplete</code>, debounced around 350 milliseconds.</li>
+                <li>Cap a map response at 100 pins. When exceeded, show a clear Zoom in to see homes message.</li>
+                <li>Start from manual city or area. Request location only after Near me and handle denial without a dead end.</li>
+              </ul>
+            </div>
+            <div class="exit">
+              <strong>Exit condition</strong>
+              A user can browse, filter, save, open detail, and switch between list and a privacy-safe native map using real Convex data.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-number">Phase 3</div>
+        <div>
+          <h3>Profiles, applications, saved searches, and inbox</h3>
+          <div class="phase-grid">
+            <div>
+              <ul>
+                <li>Generate and persist the device secret. Explain the lack of recovery or cross-device sync.</li>
+                <li>Trigger adaptive profile onboarding at the first application, not at first launch.</li>
+                <li>Request push permission during profile onboarding. Skipping cannot block an application.</li>
+                <li>Create an immutable application snapshot with an optional note and duplicate prevention.</li>
+                <li>Model <code>pending</code>, <code>shortlisted</code>, <code>declined</code>, <code>withdrawn</code>, and <code>closed</code> statuses.</li>
+                <li>Build Applications with clear status copy and the valid next action.</li>
+                <li>Create a conversation only after a server-authorized shortlist transition.</li>
+                <li>Build Inbox and message threads with offline, failed-send, report, and block states.</li>
+                <li>Persist saved searches and send Expo push notifications for matching newly published listings.</li>
+              </ul>
+            </div>
+            <div class="exit">
+              <strong>Exit condition</strong>
+              A new user can move from a real listing to one submitted application, see its status, and enter a conversation only after shortlist.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-number">Phase 4</div>
+        <div>
+          <h3>Host dashboard, listing creation, and review</h3>
+          <div class="phase-grid">
+            <div>
+              <ul>
+                <li>Turn the current listing prototype into a persistent draft with Basics, Details, Features, Location, Photos, and Review steps.</li>
+                <li>Branch fields for room, studio, apartment, and house without duplicating the whole form.</li>
+                <li>Geocode the private address and preview the approximate public location before publish.</li>
+                <li>Publish immediately after validation, then allow pause, edit, mark rented, and archive.</li>
+                <li>Add a host dashboard under You for listings, applications, and current status.</li>
+                <li>Keep the swipe deck with visible Pass and Shortlist controls, profile detail, and one-step undo.</li>
+                <li>Close outstanding applications when a listing is marked rented or archived.</li>
+              </ul>
+            </div>
+            <div class="exit">
+              <strong>Exit condition</strong>
+              A device owner can publish and manage every supported rental type, then review and shortlist a real applicant without gesture-only controls.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-number">Phase 5</div>
+        <div>
+          <h3>Trust, deletion, release gate</h3>
+          <div class="phase-grid">
+            <div>
+              <ul>
+                <li>Add report reasons: Scam, Inaccurate, Unavailable, Discriminatory, and Other.</li>
+                <li>Add blocking for conversations and prevent future contact between blocked device identities.</li>
+                <li>Apply default limits of 3 new listings per device per 24 hours, 5 active listings per device, and 10 reports per device per day.</li>
+                <li>Create an internal Convex moderation query and secret-protected takedown action. Do not build an admin app for beta.</li>
+                <li>Add Delete my data with clear scope, confirmation, progress, and cascade behavior.</li>
+                <li>Complete legal and privacy review for device identity, location handling, housing data, push notifications, retention, reporting, and deletion.</li>
+                <li>Run the full device QA matrix and distribute Expo development builds to the closed group.</li>
+              </ul>
+            </div>
+            <div class="exit">
+              <strong>Exit condition</strong>
+              Abuse can be reported and stopped, user data can be deleted, legal and privacy questions are resolved, and both platform builds pass the beta acceptance checklist.
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="data">
+      <p class="eyebrow">06 / Data and backend</p>
+      <h2>Extend the existing Convex model, do not rebuild it</h2>
+      <p class="section-intro">
+        The backend already has useful foundations: device ownership, listings, saved listings, and private-address redaction. Keep those boundaries and add the smallest records needed to complete the product loop.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Record</th>
+              <th scope="col">Key additions</th>
+              <th scope="col">Required rule</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Listing</td><td>Add studio, content language, exact private coordinate, displaced public coordinate, lifecycle, and moderation state.</td><td>Only the owning device secret can mutate it. Public queries never expose exact address or coordinates.</td></tr>
+            <tr><td>Profile</td><td>Use a <code>sharedHome</code> or <code>privateRental</code> discriminant and fields relevant to that context.</td><td>The device owner can update the current profile. Applications store a snapshot.</td></tr>
+            <tr><td>Application</td><td>Listing, applicant device, snapshot, note, status, and transition timestamps.</td><td>One active submission per device and listing. Only valid actors can transition state.</td></tr>
+            <tr><td>Conversation and message</td><td>Application link, participants, messages, read state, block state.</td><td>A conversation can exist only for a shortlisted application.</td></tr>
+            <tr><td>Saved search</td><td>Filters, area, notification preference, last match time.</td><td>Match newly published listings and enqueue one bounded push notification.</td></tr>
+            <tr><td>Push token</td><td>Device identity, platform, token, permission state, last seen.</td><td>Remove invalid tokens and do not treat denied permission as a product failure.</td></tr>
+            <tr><td>Report</td><td>Reporter, target, reason, details, created time, moderation status.</td><td>Rate-limit creation and keep the reporter private from the reported party.</td></tr>
+            <tr><td>Rate limit</td><td>Action, hashed device identity, time bucket, count.</td><td>Enforce on the server. Client messaging explains the next valid action.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="three-col" style="margin-top: 22px;">
+        <article class="panel">
+          <h3>Identity boundary</h3>
+          <p>Generate a high-entropy secret on device, keep it in SecureStore, and hash it at the server boundary. Treat it as beta bearer authentication, not as a durable account.</p>
+        </article>
+        <article class="panel">
+          <h3>Location boundary</h3>
+          <p>Store exact location only for authorized host use. Derive one stable displaced public point so the pin does not move between sessions.</p>
+        </article>
+        <article class="panel">
+          <h3>Metric boundary</h3>
+          <p>Compute submissions, shortlists, and time-to-shortlist from first-party application timestamps. Add a full analytics system only after beta questions justify it.</p>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Map implementation</strong>
+        <p>Use the Expo-supported <a href="https://docs.expo.dev/versions/v55.0.0/sdk/map-view/">react-native-maps integration for SDK 55</a>. The beta map is native only. Web should retain the list and filters inside a centered layout.</p>
+      </div>
+    </section>
+
+    <section id="verification">
+      <p class="eyebrow">07 / Verification and release</p>
+      <h2>Prove the whole loop on both platforms</h2>
+      <p class="section-intro">
+        Focused backend tests protect authorization and state transitions. Device QA protects the interaction contract. Both are needed because the highest-risk failures cross the client and server boundary.
+      </p>
+
+      <div class="two-col">
+        <article class="panel">
+          <h3>Focused Convex tests</h3>
+          <ul class="plain-list">
+            <li>Device ownership and secret hashing</li>
+            <li>Private address and coordinate redaction</li>
+            <li>Listing lifecycle and publishing limits</li>
+            <li>Application uniqueness and allowed transitions</li>
+            <li>Shortlist gate for conversation creation</li>
+            <li>Saved-search matching and push enqueue behavior</li>
+            <li>Report and block authorization</li>
+            <li>Delete-my-data cascade and access removal</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>Manual iOS and Android QA</h3>
+          <ul class="plain-list">
+            <li>Light and dark themes, text at 200%, safe areas, keyboard, VoiceOver, TalkBack, and reduced motion</li>
+            <li>Browse, save, filter, sort, list, map, movement, and location denial</li>
+            <li>Every listing type and both adaptive profile types</li>
+            <li>Duplicate application, withdrawal, shortlist, and chat gate</li>
+            <li>Host create, publish, pause, edit, swipe, detail, undo, mark rented, and archive</li>
+            <li>Reporting, blocking, deletion, offline, slow, empty, and failed states</li>
+          </ul>
+        </article>
+      </div>
+
+      <h3 style="margin-top: 34px;">Beta acceptance checklist</h3>
+      <ul class="checklist">
+        <li><code>bun run lint</code> passes.</li>
+        <li>Focused Convex tests pass.</li>
+        <li>No essential text or control contrast failure remains.</li>
+        <li>No essential touch target is smaller than 44 × 44 points.</li>
+        <li>All dialogs have focus containment and restoration.</li>
+        <li>Every visible action has a real result and feedback.</li>
+        <li>Exact address and coordinates never appear in public responses.</li>
+        <li>The application-to-shortlisted-conversation flow completes on iOS and Android.</li>
+        <li>Push denial and location denial both have usable fallback paths.</li>
+        <li>Delete my data removes access and retained user-owned records as specified.</li>
+        <li>Web demo remains centered, keyboard usable, and list-only for maps.</li>
+        <li>Legal and privacy review is signed off before real users enter.</li>
+      </ul>
+
+      <div class="callout">
+        <strong>First implementation slice</strong>
+        <p>Start with navigation, contrast, touch targets, modal behavior, i18n scaffolding, and removal of dead controls. Then wire one complete real-data path from Explore to room detail and save. This gives the product a truthful foundation before adding applications.</p>
+      </div>
+
+      <div class="sources" style="margin-top: 34px;">
+        <h3>Review notes</h3>
+        <p>This plan is based on live inspection of the current Expo web build, source review of the UI and Convex foundations, the product decisions made during grilling, and current official product terms linked above. Lint passed at the time of review. No production UI or application code was changed to produce this document.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>Homie UI review and closed beta plan. Standalone source document generated for the homie-client repository.</p>
+    </footer>
+  </main>
+</body>
+</html>

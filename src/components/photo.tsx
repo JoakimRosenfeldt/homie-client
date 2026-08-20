@@ -18,18 +18,32 @@ export function Photo({
   style,
   children,
   contentFit = "cover",
+  accessibilityLabel,
 }: React.PropsWithChildren<{
   uri?: string;
   label?: string;
   stripe?: number;
   style?: StyleProp<ViewStyle>;
   contentFit?: "cover" | "contain";
+  accessibilityLabel?: string;
 }>) {
   const theme = useTheme();
+  const imageLabel = accessibilityLabel ?? label ?? "";
 
   return (
     <View style={[{ backgroundColor: theme.placeholderB, overflow: "hidden" }, style]}>
-      {uri ? <Image source={uri} contentFit={contentFit} transition={180} style={{ flex: 1 }} /> : <Stripes stripe={stripe} />}
+      {uri ? (
+        <Image
+          accessibilityLabel={imageLabel}
+          alt={imageLabel}
+          source={uri}
+          contentFit={contentFit}
+          transition={180}
+          style={{ flex: 1 }}
+        />
+      ) : (
+        <Stripes accessibilityLabel={imageLabel} stripe={stripe} />
+      )}
 
       {!uri && label ? (
         <View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center", pointerEvents: "none" }]}>
@@ -49,7 +63,7 @@ export function Photo({
  * equivalent, so the bands are drawn as rotated views. Rotating by 45° shrinks
  * a band's perpendicular width by cos(45°), hence the √2 compensation.
  */
-function Stripes({ stripe }: { stripe: number }) {
+function Stripes({ stripe, accessibilityLabel }: { stripe: number; accessibilityLabel: string }) {
   const theme = useTheme();
   const [size, setSize] = React.useState({ width: 0, height: 0 });
 
@@ -69,7 +83,12 @@ function Stripes({ stripe }: { stripe: number }) {
   const length = span * 1.5;
 
   return (
-    <View onLayout={handleLayout} style={[StyleSheet.absoluteFill, { backgroundColor: theme.placeholderB, overflow: "hidden" }]}>
+    <View
+      accessibilityLabel={accessibilityLabel || undefined}
+      accessible={Boolean(accessibilityLabel)}
+      onLayout={handleLayout}
+      role={accessibilityLabel ? "img" : "presentation"}
+      style={[StyleSheet.absoluteFill, { backgroundColor: theme.placeholderB, overflow: "hidden" }]}>
       {Array.from({ length: count }, (_, index) => (
         <View
           key={index}
@@ -88,12 +107,25 @@ function Stripes({ stripe }: { stripe: number }) {
   );
 }
 
-export function Avatar({ uri, size, ring = false, stripe = 7 }: { uri?: string; size: number; ring?: boolean; stripe?: number }) {
+export function Avatar({
+  uri,
+  size,
+  ring = false,
+  stripe = 7,
+  accessibilityLabel,
+}: {
+  uri?: string;
+  size: number;
+  ring?: boolean;
+  stripe?: number;
+  accessibilityLabel?: string;
+}) {
   const theme = useTheme();
 
   return (
     <Photo
       uri={uri}
+      accessibilityLabel={accessibilityLabel}
       stripe={stripe}
       style={{
         width: size,
