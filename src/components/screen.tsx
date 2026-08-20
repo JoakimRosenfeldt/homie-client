@@ -1,6 +1,5 @@
 import React from "react";
-import { type StyleProp, View, type ViewStyle } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, type StyleProp, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/theme/tokens";
@@ -23,11 +22,13 @@ export function Screen({
   clearsTabBar = true,
   contentStyle,
   paddingHorizontal = 0,
+  maxWidth = 760,
 }: React.PropsWithChildren<{
   scroll?: boolean;
   clearsTabBar?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   paddingHorizontal?: number;
+  maxWidth?: number;
 }>) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -38,17 +39,26 @@ export function Screen({
     paddingBottom: clearsTabBar ? tabBarHeight + 24 : 24,
     paddingHorizontal,
   };
+  const shell: ViewStyle = { width: "100%", maxWidth, alignSelf: "center" };
 
   if (!scroll) {
-    return <View style={[{ flex: 1, backgroundColor: theme.background }, padding, contentStyle]}>{children}</View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        <View role="main" style={[{ flex: 1 }, shell, padding, contentStyle]}>
+          {children}
+        </View>
+      </View>
+    );
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        role="main"
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[padding, contentStyle]}>
+        contentContainerStyle={[shell, padding, contentStyle]}>
         {children}
       </ScrollView>
     </View>

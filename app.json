@@ -30,10 +30,17 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-notifications",
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Homie to access your photos so you can upload listing images."
+          "photosPermission": "Allow Homie to access your photos so you can upload listing and shared-home profile photos."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Homie to use your location to find nearby rooms."
         }
       ],
       [

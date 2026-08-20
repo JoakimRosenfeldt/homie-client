@@ -4,7 +4,9 @@ import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { SessionProvider } from "@/features/nabo/store";
+import { ProductFlowProvider } from "@/features/applications/store";
+import { HomieBackendProvider } from "@/features/backend/convex-provider";
+import { I18nProvider } from "@/i18n";
 import { useNaboFonts } from "@/theme/fonts";
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -26,17 +28,27 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, userSelect: "none" }}>
-      <SessionProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="rooms/[roomId]" />
-          <Stack.Screen name="chat/[threadId]" />
-          <Stack.Screen name="onboarding" />
-          <Stack.Screen name="search-agent" />
-          <Stack.Screen name="new-listing" />
-        </Stack>
-        <StatusBar style="auto" />
-      </SessionProvider>
+      <I18nProvider>
+        <HomieBackendProvider>
+          <ProductFlowProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="rooms/[roomId]" />
+              <Stack.Screen name="apply/[roomId]" />
+              <Stack.Screen name="applications/[applicationId]" />
+              <Stack.Screen name="inbox/[threadId]" />
+              <Stack.Screen name="profile" />
+              <Stack.Screen name="host/index" />
+              <Stack.Screen name="host/applications" />
+              <Stack.Screen name="host/applicants/[applicantId]" />
+              <Stack.Screen name="report" />
+              <Stack.Screen name="delete-data" />
+              <Stack.Screen name="new-listing" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ProductFlowProvider>
+        </HomieBackendProvider>
+      </I18nProvider>
     </GestureHandlerRootView>
   );
 }
