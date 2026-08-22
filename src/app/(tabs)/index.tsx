@@ -118,7 +118,7 @@ export default function ExploreScreen() {
   const identity = useDeviceIdentity();
   const connection = useBackendConnection();
   const [segment, setSegment] = React.useState<Segment>("browse");
-  const [city, setCity] = React.useState("København");
+  const [city, setCity] = React.useState("Aarhus");
   const [cityDraft, setCityDraft] = React.useState(city);
   const [propertyType, setPropertyType] = React.useState<PropertyType>("all");
   const [minimumRent, setMinimumRent] = React.useState("");

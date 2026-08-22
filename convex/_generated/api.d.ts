@@ -21,6 +21,7 @@ import type * as moderation from "../moderation.js";
 import type * as privacy from "../privacy.js";
 import type * as profiles from "../profiles.js";
 import type * as savedSearches from "../savedSearches.js";
+import type * as seed from "../seed.js";
 import type * as trust from "../trust.js";
 
 import type {
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   privacy: typeof privacy;
   profiles: typeof profiles;
   savedSearches: typeof savedSearches;
+  seed: typeof seed;
   trust: typeof trust;
 }>;
 
