@@ -1,5 +1,3 @@
-import { useColorScheme } from "react-native";
-
 const light = {
   isDark: false,
 
@@ -10,14 +8,14 @@ const light = {
 
   ink: "#16202B",
   body: "#33404C",
-  muted: "#566574",
-  faint: "#596979",
+  muted: "#6B7785",
+  faint: "#93A0AE",
 
-  accent: "#B7442B",
-  accentPressed: "#94351F",
+  accent: "#C2492E",
+  accentPressed: "#A33A22",
   accentSoft: "#FBE8E2",
-  accentSoftBorder: "#D9A99D",
-  accentText: "#A33A22",
+  accentSoftBorder: "rgba(194,73,46,0.18)",
+  accentText: "#C2492E",
   onAccent: "#FFFFFF",
 
   badge: "#2F5D8C",
@@ -26,13 +24,13 @@ const light = {
   border: "rgba(22,32,43,0.08)",
   borderSoft: "rgba(22,32,43,0.10)",
   borderStrong: "rgba(22,32,43,0.16)",
-  controlBorder: "#80909F",
+  controlBorder: "rgba(22,32,43,0.12)",
   borderDashed: "rgba(22,32,43,0.18)",
   divider: "rgba(22,32,43,0.07)",
   accentTrack: "rgba(194,73,46,0.20)",
 
   tabBar: "#EDF1F6",
-  tabInactive: "#596979",
+  tabInactive: "#9BA8B5",
 
   focus: "#285A78",
   success: "#2F684A",
@@ -76,7 +74,7 @@ const light = {
   matchTextMuted: "rgba(237,241,246,0.72)",
 };
 
-const dark: typeof light = {
+export const dark: typeof light = {
   isDark: true,
 
   background: "#111820",
@@ -150,7 +148,7 @@ const dark: typeof light = {
 export type Palette = typeof light;
 
 export function useTheme(): Palette {
-  return useColorScheme() === "dark" ? dark : light;
+  return light;
 }
 
 /**

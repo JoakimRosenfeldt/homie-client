@@ -195,6 +195,15 @@ const listingStatusValidator = v.union(
   v.literal("archived"),
 );
 const coordinateValidator = v.object({ latitude: v.number(), longitude: v.number() });
+const addressSuggestionValidator = v.object({
+  label: v.string(),
+  addressLine1: v.string(),
+  postalCode: v.optional(v.string()),
+  city: v.optional(v.string()),
+  countryCode: v.string(),
+  latitude: v.number(),
+  longitude: v.number(),
+});
 const completedStepValidator = v.union(
   v.literal("basics"),
   v.literal("details"),
@@ -1764,6 +1773,124 @@ type GeocodeResult = {
   publicCoordinate: { latitude: number; longitude: number };
   publicLocationLabel?: string;
 };
+
+const addressSearchPreparationValidator = v.object({ query: v.string() });
+
+export const prepareAddressSearch = internalMutation({
+  args: { ownerKey: v.string(), query: v.string() },
+  returns: addressSearchPreparationValidator,
+  handler: async (ctx, args) => {
+    const ownerKeyHash = await getActiveDeviceHash(ctx, args.ownerKey);
+    const query = boundedText(args.query, {
+      field: "Address search",
+      minimum: 3,
+      maximum: 160,
+    });
+    await enforceRateLimit(ctx, {
+      action: "searchAddress",
+      ownerKeyHash,
+      limit: 1,
+      windowMs: 1_000,
+      now: Date.now(),
+    });
+    return { query };
+  },
+});
+
+type AddressSuggestion = typeof addressSuggestionValidator.type;
+type NominatimAddress = {
+  road?: string;
+  pedestrian?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
+  countryCode?: string;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function stringProperty(value: Record<string, unknown>, key: string) {
+  const property = value[key];
+  return typeof property === "string" ? property.trim() || undefined : undefined;
+}
+
+function parseNominatimAddress(value: unknown): NominatimAddress {
+  if (!isRecord(value)) return {};
+  return {
+    road: stringProperty(value, "road"),
+    pedestrian: stringProperty(value, "pedestrian"),
+    houseNumber: stringProperty(value, "house_number"),
+    postalCode: stringProperty(value, "postcode"),
+    city:
+      stringProperty(value, "city") ??
+      stringProperty(value, "town") ??
+      stringProperty(value, "village") ??
+      stringProperty(value, "municipality"),
+    countryCode: stringProperty(value, "country_code"),
+  };
+}
+
+function parseAddressSuggestion(value: unknown): AddressSuggestion | undefined {
+  if (!isRecord(value)) return undefined;
+  const displayName = stringProperty(value, "display_name");
+  const latitude = Number(stringProperty(value, "lat"));
+  const longitude = Number(stringProperty(value, "lon"));
+  const rawAddress = value.address;
+  const address = parseNominatimAddress(rawAddress);
+  const street = address.road ?? address.pedestrian;
+  const addressLine1 = [street, address.houseNumber].filter(Boolean).join(" ") ||
+    displayName?.split(",")[0]?.trim();
+  if (
+    !displayName ||
+    !addressLine1 ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+    return undefined;
+  }
+  return {
+    label: displayName,
+    addressLine1,
+    postalCode: address.postalCode,
+    city: address.city,
+    countryCode: address.countryCode?.toUpperCase() ?? "DK",
+    latitude,
+    longitude,
+  };
+}
+
+export const searchAddresses = action({
+  args: { ownerKey: v.string(), query: v.string() },
+  returns: v.array(addressSuggestionValidator),
+  handler: async (ctx, args): Promise<AddressSuggestion[]> => {
+    const preparation: typeof addressSearchPreparationValidator.type = await ctx.runMutation(
+      internal.listings.prepareAddressSearch,
+      args,
+    );
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.searchParams.set("q", preparation.query);
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("countrycodes", "dk");
+    url.searchParams.set("limit", "5");
+    url.searchParams.set("accept-language", "en,da");
+    const response = await fetch(url, {
+      headers: { "User-Agent": "Homie rental listing address search" },
+    });
+    if (!response.ok) {
+      throw new ConvexError("Address search is unavailable. Try again shortly.");
+    }
+    const body: unknown = await response.json();
+    if (!Array.isArray(body)) {
+      throw new ConvexError("The address service returned an invalid response.");
+    }
+    return body
+      .map(parseAddressSuggestion)
+      .filter((suggestion): suggestion is AddressSuggestion => suggestion !== undefined);
+  },
+});
 
 export const geocodeLocation = action({
   args: { listingId: v.id("listings"), ownerKey: v.string() },

@@ -29,6 +29,7 @@ const MAX_ATTEMPTS = 5;
 const LEASE_MS = 60_000;
 const RECEIPT_DELAY_MS = 15 * 60_000;
 const TERMINAL_RETENTION_MS = 7 * 24 * 60 * 60_000;
+const rentalArrangementValidator = v.union(v.literal("standard"), v.literal("sublease"));
 
 const savedSearchViewValidator = v.object({
   _id: v.id("savedSearches"),
@@ -36,6 +37,8 @@ const savedSearchViewValidator = v.object({
   name: v.string(),
   area: v.optional(v.string()),
   propertyTypes: v.array(propertyTypeValidator),
+  rentalArrangements: v.optional(v.array(rentalArrangementValidator)),
+  availableFromPrefix: v.optional(v.string()),
   minimumRent: v.optional(v.number()),
   maximumRent: v.optional(v.number()),
   notificationsEnabled: v.boolean(),
@@ -47,6 +50,13 @@ const savedSearchViewValidator = v.object({
 function matches(search: Doc<"savedSearches">, listing: Doc<"listings">) {
   if (search.propertyTypes.length > 0 &&
     (!listing.propertyType || !search.propertyTypes.includes(listing.propertyType))) return false;
+  if ((search.rentalArrangements?.length ?? 0) > 0 &&
+    (!listing.rentalArrangement || !search.rentalArrangements?.includes(listing.rentalArrangement))) {
+    return false;
+  }
+  if (search.availableFromPrefix && !listing.availableFrom?.startsWith(search.availableFromPrefix)) {
+    return false;
+  }
   if (search.minimumRent !== undefined && (listing.monthlyRent ?? 0) < search.minimumRent) {
     return false;
   }
@@ -630,7 +640,8 @@ export const maintainPushQueue = internalMutation({
 function toView(search: Doc<"savedSearches">) {
   return {
     _id: search._id, _creationTime: search._creationTime, name: search.name, area: search.area,
-    propertyTypes: search.propertyTypes, minimumRent: search.minimumRent,
+    propertyTypes: search.propertyTypes, rentalArrangements: search.rentalArrangements,
+    availableFromPrefix: search.availableFromPrefix, minimumRent: search.minimumRent,
     maximumRent: search.maximumRent, notificationsEnabled: search.notificationsEnabled,
     lastMatchedAt: search.lastMatchedAt, createdAt: search.createdAt, updatedAt: search.updatedAt,
   };
@@ -653,6 +664,8 @@ export const save = mutation({
   args: {
     ownerKey: v.string(), savedSearchId: v.optional(v.id("savedSearches")), name: v.string(),
     area: v.optional(v.string()), propertyTypes: v.array(propertyTypeValidator),
+    rentalArrangements: v.optional(v.array(rentalArrangementValidator)),
+    availableFromPrefix: v.optional(v.string()),
     minimumRent: v.optional(v.number()), maximumRent: v.optional(v.number()),
     notificationsEnabled: v.boolean(),
   },
@@ -662,6 +675,13 @@ export const save = mutation({
     const name = boundedText(args.name, { field: "Saved search name", maximum: 100 });
     const area = optionalBoundedText(args.area, { field: "Area", maximum: 160 });
     boundedArray(args.propertyTypes, { field: "Property types", maximum: 4 });
+    boundedArray(args.rentalArrangements ?? [], { field: "Rental arrangements", maximum: 2 });
+    const availableFromPrefix = optionalBoundedText(args.availableFromPrefix, {
+      field: "Available-from month", maximum: 7,
+    });
+    if (availableFromPrefix && !/^\d{4}-\d{2}$/.test(availableFromPrefix)) {
+      throw new ConvexError("Available-from month must use YYYY-MM.");
+    }
     optionalBoundedNumber(args.minimumRent, {
       field: "Minimum rent", minimum: 0, maximum: 10_000_000,
     });
@@ -682,6 +702,10 @@ export const save = mutation({
     const now = Date.now();
     const values = {
       name, area, propertyTypes: Array.from(new Set(args.propertyTypes)),
+      rentalArrangements: args.rentalArrangements
+        ? Array.from(new Set(args.rentalArrangements))
+        : undefined,
+      availableFromPrefix,
       minimumRent: args.minimumRent, maximumRent: args.maximumRent,
       notificationsEnabled: args.notificationsEnabled, updatedAt: now,
     };

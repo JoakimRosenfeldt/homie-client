@@ -34,6 +34,7 @@ export async function enforceRateLimit(
       | "publishListing"
       | "createReport"
       | "geocodeListing"
+      | "searchAddress"
       | "submitApplication"
       | "sendMessage"
       | "createSavedSearch";
